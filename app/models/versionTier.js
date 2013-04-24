@@ -1,6 +1,6 @@
-App.VersionTier = App.Milo.extend({
+App.VersionTier = Milo.Model.extend({
 	rootElement: 'tiers',
-	uriTemplate: App.UriTemplate('/services/%@/versions/%@/tiers/%@', {
+	uriTemplate: Milo.UriTemplate('/services/%@/versions/%@/tiers/%@', {
 		namedParams: ['serviceId', 'versionId', 'tierId']
 	})
 });

@@ -1,6 +1,6 @@
-App.Service = App.Milo.extend({
+App.Service = Milo.Model.extend({
     rootElement: 'services',
-    uriTemplate: App.UriTemplate('/services/%@'),
+    uriTemplate: Milo.UriTemplate('/services/%@'),
 
     //// TODO: Implement a has-many interface
     versions: function () {

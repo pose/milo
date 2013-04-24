@@ -1,0 +1,14 @@
+{
+  "files": [
+    {
+      "from": "helper.js.hbs",
+      "to": "app/{{path}}/{{name}}.js"
+    },
+    {
+      "from": "helper-require.js.hbs",
+      "to": "app/helpers.js",
+      "method" : "append"
+    }
+  ],
+  "dependencies": []
+}

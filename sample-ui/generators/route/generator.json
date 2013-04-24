@@ -1,0 +1,14 @@
+{
+  "files": [
+    {
+      "from": "route.js.hbs",
+      "to": "app/{{path}}/{{name}}.js"
+    },
+    {
+      "from": "route-require.js.hbs",
+      "to": "app/routes.js",
+      "method" : "append"
+    }
+  ],
+  "dependencies": []
+}

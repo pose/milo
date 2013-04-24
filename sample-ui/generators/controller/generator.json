@@ -1,0 +1,14 @@
+{
+  "files": [
+    {
+      "from": "controller.js.hbs",
+      "to": "app/{{path}}/{{name}}.js"
+    },
+    {
+      "from": "controller-require.js.hbs",
+      "to": "app/controllers.js",
+      "method" : "append"
+    }
+  ],
+  "dependencies": []
+}

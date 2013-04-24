@@ -1,0 +1,14 @@
+{
+  "files": [
+    {
+      "from": "template.hbs.hbs",
+      "to": "app/{{path}}/{{name}}.hbs"
+    },
+    {
+      "from": "template-require.js.hbs",
+      "to": "app/templates.js",
+      "method" : "append"
+    }
+  ],
+  "dependencies": []
+}

@@ -1,0 +1,14 @@
+{
+  "files": [
+    {
+      "from": "model.js.hbs",
+      "to": "app/{{path}}/{{name}}.js"
+    },
+    {
+      "from": "model-require.js.hbs",
+      "to": "app/models.js",
+      "method" : "append"
+    }
+  ],
+  "dependencies": []
+}

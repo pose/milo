@@ -1,3 +1,5 @@
+var App = require('app');
+
 App.Version = Milo.Model.extend({
 	rootElement: 'versions',
 	uriTemplate: Milo.UriTemplate('/services/%@/versions/%@', {
@@ -11,3 +13,5 @@ App.Version = Milo.Model.extend({
 		});
 	}.property().volatile() //// Avoiding Ember Cache,
 });
+
+module.exports = App.Version;

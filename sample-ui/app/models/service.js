@@ -1,3 +1,5 @@
+var App = require('app');
+
 App.Service = Milo.Model.extend({
     rootElement: 'services',
     uriTemplate: Milo.UriTemplate('/services/%@'),
@@ -9,3 +11,5 @@ App.Service = Milo.Model.extend({
         });
     }.property().volatile() //// Avoiding Ember Cache)
 });
+
+module.exports = App.Service;

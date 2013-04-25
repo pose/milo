@@ -7,5 +7,7 @@ App.Service = Milo.Model.extend({
         return App.Version.find({
             serviceId: this.get('id')
         });
-    }.property().volatile() //// Avoiding Ember Cache
+    }.property().volatile(), //// Avoiding Ember Cache
+
+    list: Milo.hasMany(App.Version, 'serviceId')
 });

@@ -9,5 +9,7 @@ App.Version = Milo.Model.extend({
 			serviceId: this.get('serviceId'),
 			versionId: this.get('versionId')
 		});
-	}.property().volatile() //// Avoiding Ember Cache
+	}.property().volatile(), //// Avoiding Ember Cache,
+
+	service: Milo.belongsTo(App.Service, 'serviceId')
 });

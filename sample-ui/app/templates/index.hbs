@@ -1,6 +1,10 @@
-<h2>Welcome to Ember.js</h2>
+<h2>Services</h2>
 <ul>
-    {{#each item in content}}
-        <li>{{item}}</li>
-    {{/each}}
+	{{#if content.isLoading}}
+		loading...
+	{{else}}
+	    {{#each item in content}}
+	        <li>{{item.name}}</li>
+	    {{/each}}
+    {{/if}}
 </ul>

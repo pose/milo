@@ -1,4 +1,4 @@
-#milo
+#Milo
 
 ## Running tests
 In order to run the tests you need `mocha-phantomjs`. You can do it by installing:

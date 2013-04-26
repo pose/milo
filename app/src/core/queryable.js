@@ -1,3 +1,11 @@
+/**
+@module milo-core
+*/
+
+/**
+@class Queryable
+@namespace Milo
+*/
 Milo.Queryable = Em.Mixin.create({
     orderBy: function (field) {
         this.set('orderByClause', {

@@ -46,6 +46,13 @@ module.exports = function (grunt) {
             }
         },
 
+        jsdoc: {
+            src: ['app/src/**/*.js', 'test/*.js'],
+            options: {
+                destination: 'app/doc'
+            }
+        },
+
         jshint: {
             all: ['app/src/**/*.js']
         },
@@ -73,7 +80,9 @@ module.exports = function (grunt) {
     grunt.loadNpmTasks('grunt-contrib-jshint');
     grunt.loadNpmTasks('grunt-contrib-uglify');
     grunt.loadNpmTasks('grunt-umd');
+    grunt.loadNpmTasks('grunt-jsdoc');
 
     grunt.registerTask('dist', ['concat', 'uglify', 'umd']);
     grunt.registerTask('test', ['jshint', 'mocha']);
+    grunt.registerTask('doc', ['jsdoc']);
 };

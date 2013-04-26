@@ -49,15 +49,8 @@ module.exports = function (grunt) {
             all: ['app/src/**/*.js']
         },
 
-        mocha: {
-            tests: {
-                src: ['test/test.html'],
-                options: {
-                    reporter: 'Nyan',
-                    growl: true,
-                    run: true
-                }
-            }
+        mocha_phantomjs: {
+            all: ['test/**/*.html']
         },
 
         watch: {
@@ -66,7 +59,7 @@ module.exports = function (grunt) {
         }
     });
 
-    grunt.loadNpmTasks('grunt-mocha');
+    grunt.loadNpmTasks('grunt-mocha-phantomjs');
     grunt.loadNpmTasks('grunt-contrib-watch');
     grunt.loadNpmTasks('grunt-contrib-concat');
     grunt.loadNpmTasks('grunt-contrib-jshint');
@@ -74,6 +67,6 @@ module.exports = function (grunt) {
     grunt.loadNpmTasks('grunt-jsdoc');
 
     grunt.registerTask('dist', ['concat', 'uglify']);
-    grunt.registerTask('test', ['jshint', 'mocha']);
+    grunt.registerTask('test', ['dist', 'jshint', 'mocha_phantomjs']);
     grunt.registerTask('doc', ['jsdoc']);
 };

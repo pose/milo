@@ -55,11 +55,17 @@ describe('Milo', function () {
         });
     });
 
-    describe('with jQuery mocked', function () {
+
+    describe('when called find', function () {
         var Fixture;
         beforeEach(function () {
-            console.log(sinon.spy);
-            sinon.spy($, 'ajax');
+            sinon.stub($, 'get', function (url) {
+                var defer = $.Deferred();
+                setTimeout(function () {
+                    defer.resolve({'id': 42, 'name': 'Catch 22'});
+                }, 0);
+                return defer.promise();
+            });
             Milo.Options.set('baseUrl', 'https://myurl/%@');
             Milo.Options.set('auth', {
                 access_token: 'sometoken'
@@ -67,29 +73,104 @@ describe('Milo', function () {
             Fixture = Ember.Namespace.create({
                 revision: 1
             });
-            Fixture.Foo = Milo.Model.extend({});
         });
         afterEach(function () {
-            $.ajax.restore();
+            $.get.restore();
         });
-
-        it('should make an ajax call', function () {
+        it('should fail if it does not contain properties', function () {
             Milo.Options.set('baseUrl', 'https://myapi.com/api%@');
-            Milo.Options.set('auth', {
-                access_token: 'token'
+            Milo.Options.set('auth', {access_token: 'token'});
+            
+            Fixture.Foo = Milo.Model.extend({});
+
+            Fixture.Foo.find({ 'id': 42 }).single(function () { }).done(function () { });
+        });
+
+        it('should make an ajax call when called find', function (d0ne) {
+            // XXX What happens if I want to consume more than one API?
+            // XXX Should this be static?
+            Milo.Options.set('baseUrl', 'https://myapi.com/api%@');
+            Milo.Options.set('auth', {access_token: 'token'});
+            
+            Fixture.Foo = Milo.Model.extend({
+                rootElement: 'foo',
+                uriTemplate: Milo.UriTemplate('/foo/%@'),
+                name: Milo.property('string', {
+                    defaultValue: '',
+                    operations: ['put', 'post'],
+                    validationRules: {
+                        required: true
+                    }
+                })
             });
 
-            // XXX How do I instanciate this?
+            var x = Fixture.Foo.find({ 'id': 42 }).single();
+            x.should.not.equal(undefined);
+            x.should.have.property('isLoading', true);
+            x.should.have.property('done');
+            x.done(function () {
+                // XXX Done parameters
+                // XXX What happens if what is sent does not match the schema?
+                x.should.have.property('isLoading', false);
+                console.log(x);
+                x.should.have.deep.property('deferred.id', 42);
+                d0ne();
+                
+            });
+            // TODO x shoud contain the id
+            // TODO x should be a promise
+            // TODO x must have done defined (so I can asign my callbakc)
+            // x.should.be.
+            $.get.should.have.been.calledWith('https://myapi.com/api/foo/42?access_token=token');
+        });
 
+        it('should fail if nested element is invalid', function () {
+            throw 'Not implemented';
+        });
+        
+        it('should handle nested entities', function (done) {
+            // XXX What is rootElement?
+            // XXX What is uriTemplate?
+            Milo.Options.set('baseUrl', 'https://myapi.com/api%@');
+            Milo.Options.set('auth', {access_token: 'token'});
+
+            Fixture.Bar = Milo.Model.extend({
+                rootElement: 'bar',
+                uriTemplate: Milo.UriTemplate('/bar/%@'),
+                name: Milo.property('string')
+            });
+
+            Fixture.Foo = Milo.Model.extend({
+                rootElement: 'foo',
+                uriTemplate: Milo.UriTemplate('/foo/%@'),
+                name: Milo.property('string', {
+                    defaultValue: '',
+                    operations: ['put', 'post'],
+                    validationRules: {
+                        required: true
+                    }
+                }),
+                bar: Milo.collection(Fixture.Bar)
+            });
+            
             Fixture.Foo.find({
-                'id': 42
-            }).single(function () {
-
-            }).done(function () {
-
+                id: 42 
+            })
+            .single()
+            .done(function (elem) { 
+                throw "Not implemented";
+                //done();
             });
+            
+            $.get.should.have.been.calledWith(
+                    'https://myapi.com/api/foo/42?access_token=token');
+
+            
 
         });
+
+        // XXX We shouldn't be able to pass callbacks to single
+
 
     });
 

@@ -10,10 +10,5 @@ App.Service = Milo.Model.extend({
 		}
 	}),
 
-	//// TODO: Implement a has-many interface
-	versions: function () {
-		return App.Version.find({
-			serviceId: this.get('id')
-		});
-	}.property().volatile() //// Avoiding Ember Cache)
+	versions: Milo.collection(App.Version)
 });

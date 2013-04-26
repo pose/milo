@@ -62,7 +62,7 @@ module.exports = function (grunt) {
         },
 
         watch: {
-            files: 'app/src/**/*.js',
+            files: ['app/src/**/*.js', 'test/*.js'],
             tasks: ['concat', 'jshint', 'mocha']
         }
     });
@@ -75,5 +75,5 @@ module.exports = function (grunt) {
     grunt.loadNpmTasks('grunt-umd');
 
     grunt.registerTask('dist', ['concat', 'uglify', 'umd']);
-    grunt.registerTask('test', ['concat', 'jshint', 'mocha']);
+    grunt.registerTask('test', ['jshint', 'mocha']);
 };

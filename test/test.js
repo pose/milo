@@ -62,7 +62,10 @@ describe('Milo', function () {
             sinon.stub($, 'get', function (url) {
                 var defer = $.Deferred();
                 setTimeout(function () {
-                    defer.resolve({'id': 42, 'name': 'Catch 22'});
+                    defer.resolve({
+                        'id': 42,
+                        'name': 'Catch 22'
+                    });
                 }, 0);
                 return defer.promise();
             });
@@ -79,19 +82,25 @@ describe('Milo', function () {
         });
         it('should fail if it does not contain properties', function () {
             Milo.Options.set('baseUrl', 'https://myapi.com/api%@');
-            Milo.Options.set('auth', {access_token: 'token'});
-            
+            Milo.Options.set('auth', {
+                access_token: 'token'
+            });
+
             Fixture.Foo = Milo.Model.extend({});
 
-            Fixture.Foo.find({ 'id': 42 }).single(function () { }).done(function () { });
+            Fixture.Foo.find({
+                'id': 42
+            }).single(function () {}).done(function () {});
         });
 
         it('should make an ajax call when called find', function (d0ne) {
             // XXX What happens if I want to consume more than one API?
             // XXX Should this be static?
             Milo.Options.set('baseUrl', 'https://myapi.com/api%@');
-            Milo.Options.set('auth', {access_token: 'token'});
-            
+            Milo.Options.set('auth', {
+                access_token: 'token'
+            });
+
             Fixture.Foo = Milo.Model.extend({
                 rootElement: 'foo',
                 uriTemplate: Milo.UriTemplate('/foo/%@'),
@@ -104,7 +113,9 @@ describe('Milo', function () {
                 })
             });
 
-            var x = Fixture.Foo.find({ 'id': 42 }).single();
+            var x = Fixture.Foo.find({
+                'id': 42
+            }).single();
             x.should.not.equal(undefined);
             x.should.have.property('isLoading', true);
             x.should.have.property('done');
@@ -115,7 +126,7 @@ describe('Milo', function () {
                 console.log(x);
                 x.should.have.deep.property('deferred.id', 42);
                 d0ne();
-                
+
             });
             // TODO x shoud contain the id
             // TODO x should be a promise
@@ -127,12 +138,14 @@ describe('Milo', function () {
         it('should fail if nested element is invalid', function () {
             throw 'Not implemented';
         });
-        
+
         it('should handle nested entities', function (done) {
             // XXX What is rootElement?
             // XXX What is uriTemplate?
             Milo.Options.set('baseUrl', 'https://myapi.com/api%@');
-            Milo.Options.set('auth', {access_token: 'token'});
+            Milo.Options.set('auth', {
+                access_token: 'token'
+            });
 
             Fixture.Bar = Milo.Model.extend({
                 rootElement: 'bar',
@@ -152,20 +165,20 @@ describe('Milo', function () {
                 }),
                 bar: Milo.collection(Fixture.Bar)
             });
-            
+
             Fixture.Foo.find({
-                id: 42 
+                id: 42
             })
-            .single()
-            .done(function (elem) { 
+                .single()
+                .done(function (elem) {
                 throw "Not implemented";
                 //done();
             });
-            
-            $.get.should.have.been.calledWith(
-                    'https://myapi.com/api/foo/42?access_token=token');
 
-            
+            $.get.should.have.been.calledWith(
+                'https://myapi.com/api/foo/42?access_token=token');
+
+
 
         });
 

@@ -1,4 +1,3 @@
-
 chai.should();
 var expect = chai.expect;
 
@@ -12,27 +11,34 @@ describe('Milo', function () {
         var Fixture, nothing;
 
         beforeEach(function () {
-            Fixture = Ember.Namespace.create({ revision: 1 }); 
-            Fixture.Foo = Milo.Model.extend({ });
-            nothing = function () { };
+            Fixture = Ember.Namespace.create({
+                revision: 1
+            });
+            Fixture.Foo = Milo.Model.extend({});
+            nothing = function () {};
         });
-        afterEach(function () {
-        });
+        afterEach(function () {});
 
         // XXX Shouldn't fail earlier?
         it('should fail if not set', function () {
             Milo.Options.set('baseUrl', undefined);
-            expect(Fixture.Foo.find({'id': 42}).single,nothing).to.Throw(TypeError);
+            expect(Fixture.Foo.find({
+                'id': 42
+            }).single, nothing).to.Throw(TypeError);
         });
 
         it('should fail if set to an invalid protocol', function () {
             Milo.Options.set('baseUrl', 'smtp://hello');
-            expect(Fixture.Foo.find({'id': 42}).single,nothing).to.Throw(/invalid protocol/i);
+            expect(Fixture.Foo.find({
+                'id': 42
+            }).single, nothing).to.Throw(/invalid protocol/i);
 
             Milo.Options.set('baseUrl', 'bye://hello');
-            expect(Fixture.Foo.find({'id': 42}).single,nothing).to.Throw(/invalid protocol/);
+            expect(Fixture.Foo.find({
+                'id': 42
+            }).single, nothing).to.Throw(/invalid protocol/);
         });
-        
+
         it('should work with http and https', function () {
             throw 'Not implemented';
         });
@@ -55,9 +61,13 @@ describe('Milo', function () {
             console.log(sinon.spy);
             sinon.spy($, 'ajax');
             Milo.Options.set('baseUrl', 'https://myurl/%@');
-            Milo.Options.set('auth', { access_token: 'sometoken' });
-            Fixture = Ember.Namespace.create({ revision: 1 }); 
-            Fixture.Foo = Milo.Model.extend({ });
+            Milo.Options.set('auth', {
+                access_token: 'sometoken'
+            });
+            Fixture = Ember.Namespace.create({
+                revision: 1
+            });
+            Fixture.Foo = Milo.Model.extend({});
         });
         afterEach(function () {
             $.ajax.restore();
@@ -65,20 +75,22 @@ describe('Milo', function () {
 
         it('should make an ajax call', function () {
             Milo.Options.set('baseUrl', 'https://myapi.com/api%@');
-            Milo.Options.set('auth', { access_token: 'token' });
+            Milo.Options.set('auth', {
+                access_token: 'token'
+            });
 
             // XXX How do I instanciate this?
-            
+
             Fixture.Foo.find({
                 'id': 42
-            }).single(function () { 
-            
+            }).single(function () {
+
             }).done(function () {
 
             });
 
         });
-        
+
     });
 
     describe('Queryable', function () {
@@ -101,15 +113,15 @@ describe('Milo', function () {
             it('should generate the clause', function () {
                 queryable.take(15);
                 queryable.get('takeClause').limit.should.equal(15);
-            
+
             });
             it('should work with 0', function () {
                 queryable.take(0);
                 queryable.get('takeClause').limit.should.equal(0);
             });
             it('should not allow invalid indexes', function () {
-                expect(queryable.take,-14).to.Throw(/invalid index/i);
-                expect(queryable.take,'hello').to.Throw(/invalid index/i);
+                expect(queryable.take, -14).to.Throw(/invalid index/i);
+                expect(queryable.take, 'hello').to.Throw(/invalid index/i);
             });
         });
         describe('skip', function () {
@@ -121,8 +133,8 @@ describe('Milo', function () {
                 queryable.skip(0);
             });
             it('should not allow invalid indexes', function () {
-                expect(queryable.skip,-4).to.Throw(/invalid index/i);
-                expect(queryable.skip,'bar').to.Throw(/invalid index/i);
+                expect(queryable.skip, -4).to.Throw(/invalid index/i);
+                expect(queryable.skip, 'bar').to.Throw(/invalid index/i);
             });
         });
         it('must support find', function () {

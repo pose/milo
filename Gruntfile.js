@@ -2,10 +2,24 @@ module.exports = function (grunt) {
     grunt.initConfig({
         pkg: grunt.file.readJSON('package.json'),
 
+        dirs: {
+            src: ['app/src/namespace.js',
+                'app/src/core/options.js',
+                'app/src/dsl/uriTemplates.js',
+                'app/src/dsl/collection.js',
+                'app/src/dsl/property.js',
+                'app/src/core/deferred.js',
+                'app/src/core/proxy.js',
+                'app/src/core/arrayProxy.js',
+                'app/src/adapters/defaultAdapter.js',
+                'app/src/core/queryable.js',
+                'app/src/model.js']
+        },
+
         concat: {
             dist: {
-                src: ['app/src/**/*.js'],
-                dest: 'app/dist/<%= pkg.name %>-<%= pkg.version %>.js'
+                src: '<%= dirs.src %>',
+                dest: 'app/dist/<%= pkg.name %>.js'
             },
             sentToExample: {
                 src: ['app/src/**/*.js'],
@@ -19,15 +33,15 @@ module.exports = function (grunt) {
                     report: 'gzip'
                 },
                 files: {
-                    'app/dist/<%= pkg.name %>-<%= pkg.version %>.min.js': ['app/dist/<%= pkg.name %>-<%= pkg.version %>.js']
+                    'app/dist/<%= pkg.name %>.min.js': '<%= dirs.src %>'
                 }
             }
         },
 
         umd: {
             all: {
-                src: 'app/dist/<%= pkg.name %>-<%= pkg.version %>.js',
-                dest: 'app/dist/<%= pkg.name %>-<%= pkg.version %>.umd.js',
+                src: 'app/dist/<%= pkg.name %>.js',
+                dest: 'app/dist/<%= pkg.name %>.umd.js',
                 objectToExport: 'library'
             }
         },
@@ -49,7 +63,7 @@ module.exports = function (grunt) {
 
         watch: {
             files: 'app/src/**/*.js',
-            tasks: ['jshint', 'mocha']
+            tasks: ['concat', 'jshint', 'mocha']
         }
     });
 
@@ -61,5 +75,5 @@ module.exports = function (grunt) {
     grunt.loadNpmTasks('grunt-umd');
 
     grunt.registerTask('dist', ['concat', 'uglify', 'umd']);
-    grunt.registerTask('test', ['jshint', 'mocha']);
+    grunt.registerTask('test', ['concat', 'jshint', 'mocha']);
 };

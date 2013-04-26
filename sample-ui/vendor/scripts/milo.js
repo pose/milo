@@ -54,29 +54,82 @@ var _validateNumber = function (count) {
         throw 'Invalid index "' + count + '"';
     }
 };
+/**
+@module milo-core
+*/
+
+/**
+@class ArrayProxy
+@namespace Milo
+*/
 Milo.ArrayProxy = Em.ArrayProxy.extend(Milo.Deferred, {
 	isLoading: null
 });
-  Milo.Deferred = Em.Mixin.create({
-      done: function (callback) {
-          this.get('deferred').done(callback);
-          return this;
-      },
-      fail: function (callback) {
-          this.get('deferred').fail(callback);
-          return this;
-      }
-  });
-Milo.Options = Em.Object.create({
-    baseUrl: null,
-    auth: null
+/**
+@module milo-core
+*/
+
+/**
+@class Deferred
+@namespace Milo
+*/
+Milo.Deferred = Em.Mixin.create({
+  /**
+    This method will be called when the  ...
+
+    @method done
+    @return {Milo.Deferred}
+  */
+  done: function (callback) {
+    this.get('deferred').done(callback);
+    return this;
+  },
+
+  /**
+    This method will be called when the  ...
+
+    @method fail
+    @return {Milo.Deferred}
+  */
+  fail: function (callback) {
+    this.get('deferred').fail(callback);
+    return this;
+  }
 });
+/**
+@module milo-core
+*/
+
+/**
+@class Options
+@namespace Milo
+*/
+Milo.Options = Em.Object.create({
+	baseUrl: null,
+	auth: null
+});
+/**
+@module milo-core
+*/
+
+/**
+@class Proxy
+@namespace Milo
+*/
 Milo.Proxy = Em.ObjectProxy.extend(Milo.Deferred, {
 	isLoading: null,
 	rollback: function () {
 		this.content.rollback();
 	}
 });
+/**
+@module milo-core
+*/
+
+/**
+@class Queryable
+@namespace Milo
+*/
 Milo.Queryable = Em.Mixin.create({
     orderBy: function (field) {
         this.set('orderByClause', {

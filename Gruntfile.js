@@ -38,14 +38,6 @@ module.exports = function (grunt) {
             }
         },
 
-        umd: {
-            all: {
-                src: 'app/dist/<%= pkg.name %>.js',
-                dest: 'app/dist/<%= pkg.name %>.umd.js',
-                objectToExport: 'library'
-            }
-        },
-
         jsdoc: {
             src: ['app/src/**/*.js', 'test/*.js'],
             options: {
@@ -79,10 +71,9 @@ module.exports = function (grunt) {
     grunt.loadNpmTasks('grunt-contrib-concat');
     grunt.loadNpmTasks('grunt-contrib-jshint');
     grunt.loadNpmTasks('grunt-contrib-uglify');
-    grunt.loadNpmTasks('grunt-umd');
     grunt.loadNpmTasks('grunt-jsdoc');
 
-    grunt.registerTask('dist', ['concat', 'uglify', 'umd']);
+    grunt.registerTask('dist', ['concat', 'uglify']);
     grunt.registerTask('test', ['jshint', 'mocha']);
     grunt.registerTask('doc', ['jsdoc']);
 };

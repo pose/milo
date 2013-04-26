@@ -2,6 +2,8 @@
     "name": "milo",
     "version": "0.0.1",
     "dependencies": {
-        "mocha": "1.9.0"
+        "mocha": "1.9.0",
+        "chai": "1.5.0",
+        "sinon-chai": "2.4.0"
     }
 }

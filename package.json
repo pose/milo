@@ -1,9 +1,19 @@
 {
-    "name": "milo",
-    "version": "0.0.1",
-    "dependencies": {
-        "mocha": "1.9.0",
-        "chai": "1.5.0",
-        "sinon-chai": "2.4.0"
-    }
+  "name": "milo",
+  "version": "0.0.1",
+  "dependencies": {
+    "mocha": "1.9.0",
+    "chai": "1.5.0",
+    "sinon-chai": "2.4.0"
+  },
+  "devDependencies": {
+    "grunt": "~0.4.1",
+    "grunt-contrib-jshint": "~0.1.1",
+    "grunt-contrib-nodeunit": "~0.1.2",
+    "grunt-contrib-concat": "~0.3.0",
+    "grunt-contrib-uglify": "~0.2.0",
+    "grunt-contrib-watch": "~0.3.1",
+    "grunt-mocha": "~0.3.1",
+    "grunt-umd": "~1.0.0"
+  }
 }

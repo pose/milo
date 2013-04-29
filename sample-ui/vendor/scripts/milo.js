@@ -1,3 +1,118 @@
+window.Milo = Em.Namespace.create({
+    revision: 1
+});
+/**
+@module milo-core
+*/
+
+/**
+@class Options
+@namespace Milo
+*/
+Milo.Options = Em.Object.create({
+	baseUrl: null,
+	auth: null
+});
+Milo.UriTemplate = function (template, options) {
+    options = options || {};
+
+    return function () {
+        return template;
+    }.property().meta(options);
+};
+Milo.collection = function (type, options) {
+    options = options || {};
+
+    return Ember.computed(function (key, value, oldValue) {
+        var parentName = this.constructor.toString(),
+            periodIndex = parentName.indexOf('.'),
+            param = '%@Id'.fmt(parentName.substring(periodIndex + 1, parentName.length)).camelize(),
+            findParams = {};
+
+        findParams[param] = this.get('id');
+
+        return type.find(findParams).toArray();
+    }).property().volatile().meta(options);
+};
+Milo.property = function (type, options) {
+    options = options || {};
+
+    return Ember.computed(function (key, value, oldValue) {
+        var temp = this.get('data').findProperty('key', key);
+
+        if (!temp) {
+            temp = this.get('data').pushObject(Em.Object.create({
+                key: key,
+                value: value,
+                orig: value
+            }));
+        } else {
+            temp.value = value;
+        }
+
+        if (oldValue) {
+            this.set('isDirty', true);
+        }
+
+        return temp.value;
+    }).property().meta(options);
+};
+/**
+@module milo-core
+*/
+
+/**
+@class Deferred
+@namespace Milo
+*/
+Milo.Deferred = Em.Mixin.create({
+  /**
+    This method will be called when the  ...
+
+    @method done
+    @return {Milo.Deferred}
+  */
+  done: function (callback) {
+    this.get('deferred').done(callback);
+    return this;
+  },
+
+  /**
+    This method will be called when the  ...
+
+    @method fail
+    @return {Milo.Deferred}
+  */
+  fail: function (callback) {
+    this.get('deferred').fail(callback);
+    return this;
+  }
+});
+/**
+@module milo-core
+*/
+
+/**
+@class Proxy
+@namespace Milo
+*/
+Milo.Proxy = Em.ObjectProxy.extend(Milo.Deferred, {
+	isLoading: null,
+	rollback: function () {
+		this.content.rollback();
+	}
+});
+/**
+@module milo-core
+*/
+
+/**
+@class ArrayProxy
+@namespace Milo
+*/
+Milo.ArrayProxy = Em.ArrayProxy.extend(Milo.Deferred, {
+	isLoading: null
+});
 Milo.DefaultAdapter = Em.Mixin.create({
     execQuery: function (proxy) {
         var params,
@@ -59,74 +174,6 @@ var _validateNumber = function (count) {
 */
 
 /**
-@class ArrayProxy
-@namespace Milo
-*/
-Milo.ArrayProxy = Em.ArrayProxy.extend(Milo.Deferred, {
-	isLoading: null
-});
-/**
-@module milo-core
-*/
-
-/**
-@class Deferred
-@namespace Milo
-*/
-Milo.Deferred = Em.Mixin.create({
-  /**
-    This method will be called when the  ...
-
-    @method done
-    @return {Milo.Deferred}
-  */
-  done: function (callback) {
-    this.get('deferred').done(callback);
-    return this;
-  },
-
-  /**
-    This method will be called when the  ...
-
-    @method fail
-    @return {Milo.Deferred}
-  */
-  fail: function (callback) {
-    this.get('deferred').fail(callback);
-    return this;
-  }
-});
-/**
-@module milo-core
-*/
-
-/**
-@class Options
-@namespace Milo
-*/
-Milo.Options = Em.Object.create({
-	baseUrl: null,
-	auth: null
-});
-/**
-@module milo-core
-*/
-
-/**
-@class Proxy
-@namespace Milo
-*/
-Milo.Proxy = Em.ObjectProxy.extend(Milo.Deferred, {
-	isLoading: null,
-	rollback: function () {
-		this.content.rollback();
-	}
-});
-/**
-@module milo-core
-*/
-
-/**
 @class Queryable
 @namespace Milo
 */
@@ -173,7 +220,7 @@ Milo.Queryable = Em.Mixin.create({
         return this;
     },
 
-    single: function (callback) {
+    single: function () {
         var proxy = Milo.Proxy.create({
             deferred: $.Deferred()
         });
@@ -182,17 +229,13 @@ Milo.Queryable = Em.Mixin.create({
             //// TODO: Throw an exception if data.lenght > 1
             proxy.set('content', this.constructor.create($.extend({}, this.get('meta'), data)));
 
-            if (typeof (callback) === 'function') {
-                proxy.done(callback.bind(proxy));
-            }
-
             proxy.get('deferred').resolve(proxy);
         }.bind(this));
 
         return proxy;
     },
 
-    toArray: function (callback) {
+    toArray: function () {
         var results = Em.A(),
             proxy = Milo.ArrayProxy.create({
                 deferred: $.Deferred()
@@ -207,60 +250,12 @@ Milo.Queryable = Em.Mixin.create({
 
             proxy.set('content', results);
 
-            if (typeof (callback) === 'function') {
-                proxy.done(callback.bind(proxy));
-            }
-
             proxy.get('deferred').resolve(proxy);
         }.bind(this));
 
         return proxy;
     }
 });
-Milo.collection = function (type, options) {
-    options = options || {};
-
-    return Ember.computed(function (key, value, oldValue) {
-        var parentName = this.constructor.toString(),
-            periodIndex = parentName.indexOf('.'),
-            param = '%@Id'.fmt(parentName.substring(periodIndex + 1, parentName.length)).camelize(),
-            findParams = {};
-
-        findParams[param] = this.get('id');
-
-        return type.find(findParams);
-    }).property().volatile().meta(options);
-};
-Milo.property = function (type, options) {
-    options = options || {};
-
-    return Ember.computed(function (key, value, oldValue) {
-        var temp = this.get('data').findProperty('key', key);
-
-        if (!temp) {
-            temp = this.get('data').pushObject(Em.Object.create({
-                key: key,
-                value: value,
-                orig: value
-            }));
-        } else {
-            temp.value = value;
-        }
-
-        if (oldValue) {
-            this.set('isDirty', true);
-        }
-
-        return temp.value;
-    }).property().meta(options);
-};
-Milo.UriTemplate = function (template, options) {
-    options = options || {};
-
-    return function () {
-        return template;
-    }.property().meta(options);
-};
 Milo.Model = Em.Object.extend(Milo.Queryable, Milo.DefaultAdapter, {
     meta: {},
 
@@ -283,7 +278,4 @@ Milo.Model.reopenClass({
     find: function (clause) {
         return this.create().find(clause);
     }
-});
-window.Milo = Em.Namespace.create({
-    revision: 1
 });

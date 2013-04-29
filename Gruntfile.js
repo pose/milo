@@ -22,7 +22,7 @@ module.exports = function (grunt) {
                 dest: 'app/dist/<%= pkg.name %>.js'
             },
             sentToExample: {
-                src: ['app/src/**/*.js'],
+                src: '<%= dirs.src %>',
                 dest: 'sample-ui/vendor/scripts/<%= pkg.name %>.js'
             }
         },

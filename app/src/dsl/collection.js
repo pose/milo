@@ -9,6 +9,6 @@ Milo.collection = function (type, options) {
 
         findParams[param] = this.get('id');
 
-        return type.find(findParams);
+        return type.find(findParams).toArray();
     }).property().volatile().meta(options);
 };

@@ -2,7 +2,7 @@ var App = require('app');
 
 App.Version = Milo.Model.extend({
 	rootElement: 'versions',
-	uriTemplate: Milo.UriTemplate('/versions/%@', {
+	uriTemplate: Milo.UriTemplate('/services/%@/versions/%@', {
 		namedParams: ['serviceId', 'versionId']
 	}),
 
@@ -11,5 +11,7 @@ App.Version = Milo.Model.extend({
 			serviceId: this.get('serviceId'),
 			versionId: this.get('versionId')
 		});
-	}.property().volatile() //// Avoiding Ember Cache
+	}.property().volatile() //// Avoiding Ember Cache,
 });
+
+module.exports = App.Version;

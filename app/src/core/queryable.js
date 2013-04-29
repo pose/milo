@@ -49,7 +49,7 @@ Milo.Queryable = Em.Mixin.create({
         return this;
     },
 
-    single: function (callback) {
+    single: function () {
         var proxy = Milo.Proxy.create({
             deferred: $.Deferred()
         });
@@ -58,17 +58,13 @@ Milo.Queryable = Em.Mixin.create({
             //// TODO: Throw an exception if data.lenght > 1
             proxy.set('content', this.constructor.create($.extend({}, this.get('meta'), data)));
 
-            if (typeof (callback) === 'function') {
-                proxy.done(callback.bind(proxy));
-            }
-
             proxy.get('deferred').resolve(proxy);
         }.bind(this));
 
         return proxy;
     },
 
-    toArray: function (callback) {
+    toArray: function () {
         var results = Em.A(),
             proxy = Milo.ArrayProxy.create({
                 deferred: $.Deferred()
@@ -82,10 +78,6 @@ Milo.Queryable = Em.Mixin.create({
             }.bind(this));
 
             proxy.set('content', results);
-
-            if (typeof (callback) === 'function') {
-                proxy.done(callback.bind(proxy));
-            }
 
             proxy.get('deferred').resolve(proxy);
         }.bind(this));

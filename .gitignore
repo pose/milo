@@ -2,3 +2,4 @@ node_modules
 app/dist
 app/doc
 sample-ui/vendor/scripts/milo.js
+test/npm-debug.log

@@ -67,6 +67,6 @@ module.exports = function (grunt) {
     grunt.loadNpmTasks('grunt-jsdoc');
 
     grunt.registerTask('dist', ['concat', 'uglify']);
-    grunt.registerTask('test', ['dist', 'jshint', 'mocha_phantomjs']);
+    grunt.registerTask('test', ['jshint', 'concat', 'mocha_phantomjs']);
     grunt.registerTask('doc', ['jsdoc']);
 };

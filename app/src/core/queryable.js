@@ -2,12 +2,26 @@
 @module milo-core
 */
 
+var _validateNumber = function (count) {
+    if (typeof count !== 'number' || count < 0) {
+        throw 'Invalid index "' + count + '"';
+    }
+};
+
+var _validateString = function (fieldName) {
+    if (typeof fieldName !== 'string') {
+        throw 'Ordering field must be a valid string';
+    }
+};
+
+
 /**
 @class Queryable
 @namespace Milo
 */
 Milo.Queryable = Em.Mixin.create({
     orderBy: function (field) {
+        _validateString(field);
         this.set('orderByClause', {
             orderBy: field,
             order: 'asc'
@@ -17,6 +31,7 @@ Milo.Queryable = Em.Mixin.create({
     },
 
     orderByDescending: function (field) {
+        _validateString(field);
         this.set('orderByClause', {
             orderBy: field,
             order: 'desc'
@@ -55,8 +70,9 @@ Milo.Queryable = Em.Mixin.create({
         });
 
         this.execQuery(proxy).done(function (data) {
+            var content = this.constructor.create($.extend({}, this.get('meta'), data));
             //// TODO: Throw an exception if data.lenght > 1
-            proxy.set('content', this.constructor.create($.extend({}, this.get('meta'), data)));
+            proxy.set('content', content);
 
             proxy.get('deferred').resolve(proxy);
         }.bind(this));

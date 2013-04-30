@@ -17,8 +17,16 @@ Milo.DefaultAdapter = Em.Mixin.create({
     },
 
     resourceUrl: function () {
-        var meta = this.constructor.metaForProperty('uriTemplate'),
-            resourceUrl;
+        var metaMap = {};
+        this.constructor.eachComputedProperty(function (key, value) {
+            metaMap[key] = value;
+        });
+
+        if (!metaMap.uriTemplate) {
+            throw "Error: uriTemplate not set in model " + this.constructor;
+        }
+
+        var meta = metaMap.uriTemplate, resourceUrl;
 
         if (meta.namedParams) {
             var params = [];
@@ -48,9 +56,3 @@ Milo.DefaultAdapter = Em.Mixin.create({
         return resourceUrl;
     }.property().volatile()
 });
-
-var _validateNumber = function (count) {
-    if (typeof count !== 'number' || count < 0) {
-        throw 'Invalid index "' + count + '"';
-    }
-};

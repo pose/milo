@@ -3,8 +3,9 @@ var expect = chai.expect;
 
 
 // Cases
-// What happens if there is no element returned in the query and I do .single?
-//
+// TODO What happens if there is no element returned in the query and I do .single?
+// TODO Support for multiple APIs (un-singletonize)
+// TODO Test always returning a proxy with deferred
 
 describe('Milo', function () {
     describe('baseUrl', function () {
@@ -17,41 +18,34 @@ describe('Milo', function () {
             Fixture.Foo = Milo.Model.extend({});
             nothing = function () {};
         });
-        afterEach(function () {});
+        afterEach(function () {
+        });
 
-        // XXX Shouldn't fail earlier?
         it('should fail if not set', function () {
-            Milo.Options.set('baseUrl', undefined);
-            expect(Fixture.Foo.find({
-                'id': 42
-            }).single, nothing).to.Throw(TypeError);
+            expect(function () { 
+                Milo.Options.set('baseUrl', undefined);
+            }).to.Throw(/not supported/i);
         });
 
         it('should fail if set to an invalid protocol', function () {
-            Milo.Options.set('baseUrl', 'smtp://hello');
-            expect(Fixture.Foo.find({
-                'id': 42
-            }).single, nothing).to.Throw(/invalid protocol/i);
+            expect(function () {
+                Milo.Options.set('baseUrl', 'smtp://hello');
+            }).to.Throw(/smtp.*not supported/i);
 
-            Milo.Options.set('baseUrl', 'bye://hello');
-            expect(Fixture.Foo.find({
-                'id': 42
-            }).single, nothing).to.Throw(/invalid protocol/);
+            expect(function () {
+                Milo.Options.set('baseUrl', 'bye://hello');
+            }).to.Throw(/bye.* not supported/i);
         });
 
         it('should work with http and https', function () {
-            throw 'Not implemented';
-        });
-    });
-
-    describe('given retrieved entities', function () {
-        it('must be able to find elements', function () {
-            throw 'Not implemented';
-        });
-    });
-    describe('if single returns more than one element', function () {
-        it('must throw an exception', function () {
-            throw 'Not implemented';
+            var http = 'http://hello',  https = 'https://hello';
+            Milo.Options.set('baseUrl', http);
+            Milo.Options.get('baseUrl').should.be.a('string');
+            Milo.Options.get('baseUrl').should.equal(http);
+            
+            Milo.Options.set('baseUrl', https);
+            Milo.Options.get('baseUrl').should.be.a('string');
+            Milo.Options.get('baseUrl').should.equal(https);
         });
     });
 
@@ -62,11 +56,11 @@ describe('Milo', function () {
             sinon.stub($, 'get', function (url) {
                 var defer = $.Deferred();
                 setTimeout(function () {
-                    defer.resolve({
+                    defer.resolve({ 
                         'id': 42,
                         'name': 'Catch 22'
                     });
-                }, 0);
+                }, 1000);
                 return defer.promise();
             });
             Milo.Options.set('baseUrl', 'https://myurl/%@');
@@ -82,27 +76,22 @@ describe('Milo', function () {
         });
         it('should fail if it does not contain properties', function () {
             Milo.Options.set('baseUrl', 'https://myapi.com/api%@');
-            Milo.Options.set('auth', {
-                access_token: 'token'
-            });
+            Milo.Options.set('auth', { access_token: 'token' });
 
             Fixture.Foo = Milo.Model.extend({});
 
-            Fixture.Foo.find({
-                'id': 42
-            }).single(function () {}).done(function () {});
+            expect(function () {
+                Fixture.Foo.find({ 'id': 42 }).single();
+            }).to.Throw(/uriTemplate not set in model/i);
         });
 
         it('should make an ajax call when called find', function (d0ne) {
-            // XXX What happens if I want to consume more than one API?
-            // XXX Should this be static?
             Milo.Options.set('baseUrl', 'https://myapi.com/api%@');
             Milo.Options.set('auth', {
                 access_token: 'token'
             });
 
             Fixture.Foo = Milo.Model.extend({
-                rootElement: 'foo',
                 uriTemplate: Milo.UriTemplate('/foo/%@'),
                 name: Milo.property('string', {
                     defaultValue: '',
@@ -113,25 +102,22 @@ describe('Milo', function () {
                 })
             });
 
-            var x = Fixture.Foo.find({
-                'id': 42
-            }).single();
-            x.should.not.equal(undefined);
-            x.should.have.property('isLoading', true);
-            x.should.have.property('done');
-            x.done(function () {
-                // XXX Done parameters
-                // XXX What happens if what is sent does not match the schema?
-                x.should.have.property('isLoading', false);
-                console.log(x);
-                x.should.have.deep.property('deferred.id', 42);
+            var foo = Fixture.Foo.find({ 'id': 42 }).single();
+            foo.should.not.equal(undefined);
+            foo.should.have.property('isLoading', true);
+            foo.should.have.property('done');
+            foo.done(function (data) {
+                // XXX What happens if what is sent does not match the schema? Ans: There is not validation
+                // First done parameter is foo
+                foo.should.be.equal(data);
+                foo.should.have.property('isLoading', false);
+                foo.get('content').should.be.ok;
+                foo.get('content.id').should.be.equal(42);
+                foo.get('content.name').should.be.equal('Catch 22');
                 d0ne();
 
             });
-            // TODO x shoud contain the id
-            // TODO x should be a promise
-            // TODO x must have done defined (so I can asign my callbakc)
-            // x.should.be.
+
             $.get.should.have.been.calledWith('https://myapi.com/api/foo/42?access_token=token');
         });
 
@@ -140,8 +126,10 @@ describe('Milo', function () {
         });
 
         it('should handle nested entities', function (done) {
-            // XXX What is rootElement?
+            // XXX What is rootElement? rootElement is the root element that contains the array
+            // (arrays should not be json as plain JSON)
             // XXX What is uriTemplate?
+            // XXX Assert that an entity can't use array if rootElement is not set
             Milo.Options.set('baseUrl', 'https://myapi.com/api%@');
             Milo.Options.set('auth', {
                 access_token: 'token'
@@ -177,21 +165,28 @@ describe('Milo', function () {
 
             $.get.should.have.been.calledWith(
                 'https://myapi.com/api/foo/42?access_token=token');
-
-
-
         });
 
-        // XXX We shouldn't be able to pass callbacks to single
 
+        describe('if single returns more than one element', function () {
+            it('must throw an exception', function () {
+                throw "Not implemented";
+            });
+        });
+
+        describe('if using toArray', function () {
+            it('should work and return collection', function () {
+                throw "Not implemented";
+            });
+
+        });
 
     });
 
     describe('Queryable', function () {
         var queryable = Em.Object.extend(Milo.Queryable, {}).create();
 
-        // XXX Can I order by unexisting fields?
-        // XXX What happen if I submit a number as field to orderBy?
+        // XXX Can I order by unexisting fields? Yes, we can't check that
 
         it('must support order asc', function () {
             queryable.orderBy('someField');
@@ -202,6 +197,17 @@ describe('Milo', function () {
             queryable.orderByDescending('someField');
             queryable.get('orderByClause').orderBy.should.equal('someField');
             queryable.get('orderByClause').order.should.equal('desc');
+        });
+        it('must validate that order fields should be string', function () {
+            expect(queryable.orderByDescending,1).to.Throw(/Ordering field must be a valid string/i);
+            expect(queryable.orderBy,1).to.Throw(/Ordering field must be a valid string/i);
+            
+            expect(queryable.orderByDescending,'').to.Throw(/Ordering field must be a valid string/i);
+            expect(queryable.orderBy,'').to.Throw(/Ordering field must be a valid string/i);
+
+            expect(queryable.orderByDescending,undefined).to.Throw(/Ordering field must be a valid string/i);
+            expect(queryable.orderBy,undefined).to.Throw(/Ordering field must be a valid string/i);
+            
         });
         describe('take', function () {
             it('should generate the clause', function () {
@@ -235,10 +241,13 @@ describe('Milo', function () {
             throw 'Not implemented';
         });
         it('must support single', function () {
+            queryable.single();
             throw 'Not implemented';
         });
         it('must support toArray', function () {
             throw 'Not implemented';
         });
     });
+
 });
+

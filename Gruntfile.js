@@ -12,6 +12,7 @@ module.exports = function (grunt) {
                 'app/src/core/proxy.js',
                 'app/src/core/arrayProxy.js',
                 'app/src/adapters/defaultAdapter.js',
+                'app/src/adapters/defaultSerializer.js',
                 'app/src/core/queryable.js',
                 'app/src/model.js']
         },
@@ -55,7 +56,7 @@ module.exports = function (grunt) {
 
         watch: {
             files: ['app/src/**/*.js', 'test/*.js'],
-            tasks: ['concat', 'jshint', 'mocha']
+            tasks: ['concat', 'jshint', 'mocha_phantomjs']
         }
     });
 

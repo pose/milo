@@ -7,5 +7,7 @@
 @namespace Milo
 */
 Milo.ArrayProxy = Em.ArrayProxy.extend(Milo.Deferred, {
-	isLoading: null
+    isLoading: false,
+    isError: false,
+    errors: null
 });

@@ -1,58 +1,161 @@
-Milo.DefaultAdapter = Em.Mixin.create({
-    execQuery: function (proxy) {
-        var params,
-        url = Milo.Options.get('baseUrl').fmt(this.get('resourceUrl'));
+Milo.DefaultAdapter = Em.Object.extend({
+    query: function (modelClass, params) {
+        var urlAndQueryParams = this._splitUrlAndDataParams(modelClass, params),
+            resourceUrl = this._buildResourceUrl(modelClass, urlAndQueryParams.urlParams),
+            url = Milo.Options.get('baseUrl') + resourceUrl,
+            queryParams = $.param(urlAndQueryParams.dataParams),
+            method = 'GET',
+            deferred = $.Deferred(),
+            meta = urlAndQueryParams.urlParams,
+            rootElement = modelClass.create().get('rootElement'),
+            that = this;
 
-        proxy.set('isLoading', true);
+        this._ajax(method, url + '?' + queryParams)
+            .done(function (data) {
+                var root = data[rootElement],
+                    deserialized;
 
-        params = $.param($.extend({},
-        this.get('orderByClause'),
-        this.get('anyClause'),
-        this.get('takeClause'),
-        Milo.Options.get('auth')));
+                if (root && Em.isArray(root)) {
+                    deserialized = Em.A(root.map(function (dataRow) {
+                        return that._deserialize(modelClass, $.extend({}, meta, dataRow));
+                        //return modelClass.create($.extend({}, meta, dataRow));
+                    }));
+                } else {
+                    deserialized = that._deserialize(modelClass, $.extend({}, meta, data));
+                    //deserialized = modelClass.create($.extend({}, meta, data));
+                }
 
-        return $.get(url + '?' + params).always(function () {
-            proxy.set('isLoading', false);
-        });
+                deferred.resolve(deserialized);
+            })
+            .fail(function () {
+                console.log('failed');
+                console.log(Em.inspect(arguments));
+                deferred.reject(arguments);
+            });
+
+        return deferred.promise();
     },
 
-    resourceUrl: function () {
-        var metaMap = {};
-        this.constructor.eachComputedProperty(function (key, value) {
-            metaMap[key] = value;
+    save: function (model) {
+        var params,
+            url = Milo.Options.get('baseUrl').fmt(this.get('resourceUrl')),
+            method = this.get('isNew') ? 'POST' : 'PUT',
+            serialized;
+
+        params = $.param(Milo.Options.get('auth'));
+        model.set('isSaving', true);
+
+        serialized = this.serialize(model);
+
+        return this._ajax(method, url + '?' + params, serialized)
+            .done(function () {
+                console.log('saved');
+                console.log(Em.inspect(arguments));
+                model.set('isDirty', false);
+                model.set('isNew', false);
+            })
+            .fail(function () {
+                console.log('failed');
+                console.log(Em.inspect(arguments));
+            })
+            .always(function () {
+                model.set('isSaving', false);
+            });
+    },
+
+    remove: function (model) {
+        var params,
+            url = Milo.Options.get('baseUrl').fmt(this.get('resourceUrl')),
+            method = 'DELETE';
+
+        params = $.param(Milo.Options.get('auth'));
+        model.set('isDeleting', true);
+
+        return this._ajax(method, url + '?' + params).always
+            .done(function () {
+                console.log('saved');
+                console.log(Em.inspect(arguments));
+                model.set('isDirty', false);
+                model.set('isNew', false);
+                model.set('isDeleted', true);
+            })
+            .fail(function () {
+                console.log('failed');
+                console.log(Em.inspect(arguments));
+            })
+            .always(function () {
+                model.set('isDeleting', false);
+            });
+    },
+
+    _serialize: function (modelClass, model, method) {
+        var serializer = Milo.Options.get('defaultSerializer').serializerFor(modelClass);
+
+        return serializer.serialize(model, method);
+    },
+
+    _deserialize: function (modelClass, json) {
+        var serializer = Milo.Options.get('defaultSerializer').serializerFor(modelClass);
+
+        return serializer.deserialize(json);
+    },
+
+    _buildResourceUrl: function (modelClass, urlParams) {
+        var urlTemplate = modelClass.create().get('uriTemplate'),
+            urlTerms = modelClass.create().get('uriTemplate').split('/');
+            resourceUrl = urlTemplate;
+
+        urlTerms.forEach(function (uriTerm) {
+            var fieldName = uriTerm.replace(':', '');
+
+            if (uriTerm.indexOf(':') === 0) {
+                resourceUrl = resourceUrl.replace(uriTerm, urlParams[fieldName] || '');
+            }
         });
 
-        if (!metaMap.uriTemplate) {
-            throw "Error: uriTemplate not set in model " + this.constructor;
-        }
+        return resourceUrl.replace(/\/$/g, '');
+    },
 
-        var meta = metaMap.uriTemplate, resourceUrl;
+    _splitUrlAndDataParams: function (modelClass, data) {
+        var urlTerms = modelClass.create().get('uriTemplate').split('/'),
+            modelClassName = modelClass.toString(),
+            modelIdField = modelClassName.substring(modelClassName.indexOf('.') + 1).camelize() + 'Id',
+            urlParams = {},
+            dataParams = JSON.parse(JSON.stringify(data));
 
-        if (meta.namedParams) {
-            var params = [];
+        urlTerms.forEach(function (uriTerm) {
+            var fieldName = uriTerm.replace(':', '');
 
-            meta.namedParams.forEach(function (param) {
-                if (this.get('anyClause')[param]) {
-                    params.push(this.get('anyClause')[param]);
+            if (uriTerm.indexOf(':') === 0) {
 
-                    this.get('meta')[param] = this.get('anyClause')[param];
-
-                    delete this.get('anyClause')[param];
+                if (dataParams[fieldName] !== undefined) {
+                    urlParams[fieldName] = dataParams[fieldName];
+                    delete dataParams[fieldName];
                 }
-            }.bind(this));
 
-            resourceUrl = Em.String.fmt(this.get('uriTemplate'), params);
-        } else if (this.get('anyClause').id) {
-            resourceUrl = this.get('uriTemplate').fmt(this.get('anyClause').id);
-            delete this.get('anyClause').id;
-        } else {
-            resourceUrl = this.get('uriTemplate').fmt();
-        }
+                if (fieldName === modelIdField && dataParams.id !== undefined) {
+                    urlParams[fieldName] = dataParams.id;
+                    delete dataParams.id;
+                }
+            }
+        });
 
-        if (resourceUrl.charAt(resourceUrl.length - 1) === '/') {
-            resourceUrl = resourceUrl.substring(resourceUrl.length - 1, 0);
-        }
+        return { urlParams: urlParams, dataParams: dataParams };
+    },
 
-        return resourceUrl;
-    }.property().volatile()
+    _ajax: function (method, url, data, cache) {
+        var cacheFlag = (method || 'GET') === 'GET' ? cache : true;
+
+        return jQuery.ajax({
+            contentType: 'application/vnd.mulesoft.habitat+json', //TODO: Milo.Options.get('contentType'),
+            type: method || 'GET',
+            dataType: (method || 'GET') === 'GET' ? 'json' : 'text',
+            data: data ? JSON.stringify(data) : '',
+            url: url,
+            headers: {
+                accept: 'application/vnd.mulesoft.habitat+json'
+            },
+            cache: cacheFlag
+        });
+    }
 });

@@ -42,18 +42,14 @@ Milo.Queryable = Em.Mixin.create({
 
     take: function (count) {
         _validateNumber(count);
-        this.set('takeClause', {
-            limit: count
-        });
+        this.set('takeClause', { limit: count });
 
         return this;
     },
 
     skip: function (count) {
         _validateNumber(count);
-        this.set('skipClause', {
-            offset: count
-        });
+        this.set('skipClause', { offset: count });
 
         return this;
     },
@@ -65,38 +61,50 @@ Milo.Queryable = Em.Mixin.create({
     },
 
     single: function () {
-        var proxy = Milo.Proxy.create({
-            deferred: $.Deferred()
+        return this._materialize(this.constructor, Milo.Proxy, function (deserialized) {
+            return Em.isArray(deserialized) ? deserialized[0] : deserialized;
         });
-
-        this.execQuery(proxy).done(function (data) {
-            var content = this.constructor.create($.extend({}, this.get('meta'), data));
-            //// TODO: Throw an exception if data.lenght > 1
-            proxy.set('content', content);
-
-            proxy.get('deferred').resolve(proxy);
-        }.bind(this));
-
-        return proxy;
     },
 
     toArray: function () {
-        var results = Em.A(),
-            proxy = Milo.ArrayProxy.create({
+        return this._materialize(this.constructor, Milo.ArrayProxy, function (deserialized) {
+            return Em.isArray(deserialized) ? deserialized : Em.A([deserialized]);
+        });
+    },
+
+    _extractParameters: function () {
+        var params = [];
+
+        params.push(this.get('anyClause'));
+        params.push(this.get('orderByClause'));
+        params.push(this.get('takeClause'));
+        params.push(this.get('skipClause'));
+        params.push(Milo.Options.get('auth'));
+
+        return $.extend.apply(null, [{}].concat(params));
+    },
+
+    _materialize: function (modelClass, proxyClass, extractContentFromDeserialized) {
+        var params = this._extractParameters(),
+            proxy = proxyClass.create({
+                isLoading: true,
+                errors: null,
                 deferred: $.Deferred()
             });
 
-        this.execQuery(proxy).done(function (data) {
-            data[this.get('rootElement')].forEach(function (value) {
-                var result = this.constructor.create($.extend({}, this.get('meta'), value));
-
-                results.pushObject(result);
-            }.bind(this));
-
-            proxy.set('content', results);
-
-            proxy.get('deferred').resolve(proxy);
-        }.bind(this));
+        Milo.Options.get('defaultDadapter').query(modelClass, params)
+            .always(function () {
+                proxy.set('isLoading', false);
+            })
+            .fail(function (errors) {
+                proxy.set('errors', errors);
+                proxy.set('isError', true);
+                proxy.get('deferred').reject(errors);
+            })
+            .done(function (deserialized) {
+                proxy.set('content', extractContentFromDeserialized(deserialized));
+                proxy.get('deferred').resolve(proxy);
+            });
 
         return proxy;
     }

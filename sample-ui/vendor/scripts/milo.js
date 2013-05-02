@@ -5,14 +5,37 @@ window.Milo = Em.Namespace.create({
 @module milo-core
 */
 
+
+var OptionsClass = Em.Object.extend({
+    baseUrl: (function () {
+        var _baseUrl;
+        return function (key, value) {
+            var validScheme = ['http://', 'https://'].map(function (e) {
+                if (value) {
+                    return value.indexOf(e) === 0;
+                }
+                return false;
+            }).reduce(function (x,y) {
+                return x || y;
+            }, false);
+            if (value && typeof value === 'string' && validScheme) {
+                _baseUrl = value;
+                return value;
+            }
+
+            throw 'Protocol "' + value + '" not supported.';
+        }.property();
+    })()
+});
+
 /**
 @class Options
 @namespace Milo
 */
-Milo.Options = Em.Object.create({
-	baseUrl: null,
-	auth: null
+Milo.Options = OptionsClass.create({
+    auth: null
 });
+
 Milo.UriTemplate = function (template, options) {
     options = options || {};
 
@@ -20,42 +43,63 @@ Milo.UriTemplate = function (template, options) {
         return template;
     }.property().meta(options);
 };
-Milo.collection = function (type, options) {
-    options = options || {};
+var _computedPropery = Ember.computed(function (key, value, oldValue) {
+    var temp = this.get('data').findProperty('key', key);
 
-    return Ember.computed(function (key, value, oldValue) {
-        var parentName = this.constructor.toString(),
-            periodIndex = parentName.indexOf('.'),
-            param = '%@Id'.fmt(parentName.substring(periodIndex + 1, parentName.length)).camelize(),
-            findParams = {};
+    if (!temp) {
+        temp = this.get('data').pushObject(Em.Object.create({
+            key: key,
+            value: value,
+            orig: value
+        }));
+    } else {
+        temp.value = value;
+    }
 
-        findParams[param] = this.get('id');
+    if (oldValue) {
+        this.set('isDirty', true);
+    }
 
-        return type.find(findParams).toArray();
-    }).property().volatile().meta(options);
-};
+    return temp.value;
+});
+
 Milo.property = function (type, options) {
     options = options || {};
+    options.ocurrences = options.ocurrences || "one";
+    options.embedded = true;
+    options.type = type || 'string';
+    options.defaultValue = (options.defaultValue === undefined) ? null : options.defaultValue;
+    options.operations = (options.operations === undefined) ? ['put', 'post'] : options.operations;
+    options.validationRules = (options.validationRules === undefined) ? {} : options.validationRules;
 
-    return Ember.computed(function (key, value, oldValue) {
-        var temp = this.get('data').findProperty('key', key);
+    return _computedPropery.property().meta(options);
+};
 
-        if (!temp) {
-            temp = this.get('data').pushObject(Em.Object.create({
-                key: key,
-                value: value,
-                orig: value
-            }));
-        } else {
-            temp.value = value;
-        }
+Milo.collection = function (type, options) {
+    options = options || {};
+    options.ocurrences = options.ocurrences || "one";
+    options.embedded = options.embedded || false ? true : false;
+    options.type = type || 'string';
+    options.defaultValue = (options.defaultValue === undefined) ? null : options.defaultValue;
+    options.operations = (options.operations === undefined) ? ['put', 'post'] : options.operations;
+    options.validationRules = (options.validationRules === undefined) ? {} : options.validationRules;
 
-        if (oldValue) {
-            this.set('isDirty', true);
-        }
+    if (options.embedded) {
+        return _computedPropery.property().meta(options);
+    } else {
+        return Ember.computed(function (key, value, oldValue) {
+            var parentName = this.constructor.toString(),
+                param = '%@Id'.fmt(parentName.substring(parentName.indexOf('.') + 1, parentName.length)).camelize(),
+                findParams = JSON.parse(JSON.stringify(this.get('anyClause') || {}));
 
-        return temp.value;
-    }).property().meta(options);
+            type = (typeof(type) === 'string') ? Em.get(type) : type;
+
+            findParams[param] = findParams.id || this.get('id');
+            delete findParams.id;
+
+            return type.find(findParams);
+        }).property().volatile().meta(options);
+    }
 };
 /**
 @module milo-core
@@ -97,10 +141,17 @@ Milo.Deferred = Em.Mixin.create({
 @namespace Milo
 */
 Milo.Proxy = Em.ObjectProxy.extend(Milo.Deferred, {
-	isLoading: null,
-	rollback: function () {
-		this.content.rollback();
-	}
+    isLoading: false,
+    isSaving: false,
+    isDeleting: false,
+    isNew: false,
+    isDirty: false,
+    isError: false,
+    errors: null,
+
+    rollback: function () {
+        this.get('content').rollback();
+    }
 });
 /**
 @module milo-core
@@ -111,67 +162,303 @@ Milo.Proxy = Em.ObjectProxy.extend(Milo.Deferred, {
 @namespace Milo
 */
 Milo.ArrayProxy = Em.ArrayProxy.extend(Milo.Deferred, {
-	isLoading: null
+    isLoading: false,
+    isError: false,
+    errors: null
 });
-Milo.DefaultAdapter = Em.Mixin.create({
-    execQuery: function (proxy) {
-        var params,
-        url = Milo.Options.get('baseUrl').fmt(this.get('resourceUrl'));
+Milo.DefaultAdapter = Em.Object.extend({
+    query: function (modelClass, params) {
+        var urlAndQueryParams = this._splitUrlAndDataParams(modelClass, params),
+            resourceUrl = this._buildResourceUrl(modelClass, urlAndQueryParams.urlParams),
+            url = Milo.Options.get('baseUrl') + resourceUrl,
+            queryParams = $.param(urlAndQueryParams.dataParams),
+            method = 'GET',
+            deferred = $.Deferred(),
+            meta = urlAndQueryParams.urlParams,
+            rootElement = modelClass.create().get('rootElement'),
+            that = this;
 
-        proxy.set('isLoading', true);
+        this._ajax(method, url + '?' + queryParams)
+            .done(function (data) {
+                var root = data[rootElement],
+                    deserialized;
 
-        params = $.param($.extend({},
-        this.get('orderByClause'),
-        this.get('anyClause'),
-        this.get('takeClause'),
-        Milo.Options.get('auth')));
+                if (root && Em.isArray(root)) {
+                    deserialized = Em.A(root.map(function (dataRow) {
+                        return that._deserialize(modelClass, $.extend({}, meta, dataRow));
+                        //return modelClass.create($.extend({}, meta, dataRow));
+                    }));
+                } else {
+                    deserialized = that._deserialize(modelClass, $.extend({}, meta, data));
+                    //deserialized = modelClass.create($.extend({}, meta, data));
+                }
 
-        return $.get(url + '?' + params).always(function () {
-            proxy.set('isLoading', false);
-        });
+                deferred.resolve(deserialized);
+            })
+            .fail(function () {
+                console.log('failed');
+                console.log(Em.inspect(arguments));
+                deferred.reject(arguments);
+            });
+
+        return deferred.promise();
     },
 
-    resourceUrl: function () {
-        var meta = this.constructor.metaForProperty('uriTemplate'),
-            resourceUrl;
+    save: function (model) {
+        var params,
+            url = Milo.Options.get('baseUrl').fmt(this.get('resourceUrl')),
+            method = this.get('isNew') ? 'POST' : 'PUT',
+            serialized;
 
-        if (meta.namedParams) {
-            var params = [];
+        params = $.param(Milo.Options.get('auth'));
+        model.set('isSaving', true);
 
-            meta.namedParams.forEach(function (param) {
-                if (this.get('anyClause')[param]) {
-                    params.push(this.get('anyClause')[param]);
+        serialized = this.serialize(model);
 
-                    this.get('meta')[param] = this.get('anyClause')[param];
+        return this._ajax(method, url + '?' + params, serialized)
+            .done(function () {
+                console.log('saved');
+                console.log(Em.inspect(arguments));
+                model.set('isDirty', false);
+                model.set('isNew', false);
+            })
+            .fail(function () {
+                console.log('failed');
+                console.log(Em.inspect(arguments));
+            })
+            .always(function () {
+                model.set('isSaving', false);
+            });
+    },
 
-                    delete this.get('anyClause')[param];
+    remove: function (model) {
+        var params,
+            url = Milo.Options.get('baseUrl').fmt(this.get('resourceUrl')),
+            method = 'DELETE';
+
+        params = $.param(Milo.Options.get('auth'));
+        model.set('isDeleting', true);
+
+        return this._ajax(method, url + '?' + params).always
+            .done(function () {
+                console.log('saved');
+                console.log(Em.inspect(arguments));
+                model.set('isDirty', false);
+                model.set('isNew', false);
+                model.set('isDeleted', true);
+            })
+            .fail(function () {
+                console.log('failed');
+                console.log(Em.inspect(arguments));
+            })
+            .always(function () {
+                model.set('isDeleting', false);
+            });
+    },
+
+    _serialize: function (modelClass, model, method) {
+        var serializer = Milo.Options.get('defaultSerializer').serializerFor(modelClass);
+
+        return serializer.serialize(model, method);
+    },
+
+    _deserialize: function (modelClass, json) {
+        var serializer = Milo.Options.get('defaultSerializer').serializerFor(modelClass);
+
+        return serializer.deserialize(json);
+    },
+
+    _buildResourceUrl: function (modelClass, urlParams) {
+        var urlTemplate = modelClass.create().get('uriTemplate'),
+            urlTerms = modelClass.create().get('uriTemplate').split('/');
+            resourceUrl = urlTemplate;
+
+        urlTerms.forEach(function (uriTerm) {
+            var fieldName = uriTerm.replace(':', '');
+
+            if (uriTerm.indexOf(':') === 0) {
+                resourceUrl = resourceUrl.replace(uriTerm, urlParams[fieldName] || '');
+            }
+        });
+
+        return resourceUrl.replace(/\/$/g, '');
+    },
+
+    _splitUrlAndDataParams: function (modelClass, data) {
+        var urlTerms = modelClass.create().get('uriTemplate').split('/'),
+            modelClassName = modelClass.toString(),
+            modelIdField = modelClassName.substring(modelClassName.indexOf('.') + 1).camelize() + 'Id',
+            urlParams = {},
+            dataParams = JSON.parse(JSON.stringify(data));
+
+        urlTerms.forEach(function (uriTerm) {
+            var fieldName = uriTerm.replace(':', '');
+
+            if (uriTerm.indexOf(':') === 0) {
+
+                if (dataParams[fieldName] !== undefined) {
+                    urlParams[fieldName] = dataParams[fieldName];
+                    delete dataParams[fieldName];
                 }
-            }.bind(this));
 
-            resourceUrl = Em.String.fmt(this.get('uriTemplate'), params);
-        } else if (this.get('anyClause').id) {
-            resourceUrl = this.get('uriTemplate').fmt(this.get('anyClause').id);
-            delete this.get('anyClause').id;
-        } else {
-            resourceUrl = this.get('uriTemplate').fmt();
-        }
+                if (fieldName === modelIdField && dataParams.id !== undefined) {
+                    urlParams[fieldName] = dataParams.id;
+                    delete dataParams.id;
+                }
+            }
+        });
 
-        if (resourceUrl.charAt(resourceUrl.length - 1) === '/') {
-            resourceUrl = resourceUrl.substring(resourceUrl.length - 1, 0);
-        }
+        return { urlParams: urlParams, dataParams: dataParams };
+    },
 
-        return resourceUrl;
-    }.property().volatile()
+    _ajax: function (method, url, data, cache) {
+        var cacheFlag = (method || 'GET') === 'GET' ? cache : true;
+
+        return jQuery.ajax({
+            contentType: 'application/vnd.mulesoft.habitat+json', //TODO: Milo.Options.get('contentType'),
+            type: method || 'GET',
+            dataType: (method || 'GET') === 'GET' ? 'json' : 'text',
+            data: data ? JSON.stringify(data) : '',
+            url: url,
+            headers: {
+                accept: 'application/vnd.mulesoft.habitat+json'
+            },
+            cache: cacheFlag
+        });
+    }
 });
+
+var _defaultSerializer = {
+        serialize: function (value) {
+            return value;
+        },
+
+        deserialize: function (value) {
+            return value;
+        }
+    },
+    _booleanSerializer = {
+        serialize: function (value) {
+            return value ? true : false;
+        },
+
+        deserialize: function (value) {
+            return value ? true : false;
+        }
+    },
+    _numberSerializer = {
+        serialize: function (value) {
+            var numeric = parseFloat(value);
+            return isNaN(numeric) ? 0 : numeric;
+        },
+
+        deserialize: function (value) {
+            var numeric = parseFloat(value);
+            return isNaN(numeric) ? 0 : numeric;
+        }
+    };
+
+Milo.DefaultSerializer = Em.Object.extend({
+    serializerCache: null,
+
+    init: function () {
+        var cache = Em.Map.create();
+
+        cache.set('string', _defaultSerializer);
+        cache.set('boolean', _booleanSerializer);
+        cache.set('array', _defaultSerializer);
+        cache.set('number', _numberSerializer);
+
+        this.set('serializerCache', cache);
+    },
+
+    serializerFor: function (modelClass) {
+        var cache = this.get('serializerCache'),
+            serializer = cache.get(modelClass);
+
+        if (!serializer) {
+            modelClass = (typeof(modelClass) === 'string') ? Em.get(modelClass) : modelClass;
+            serializer = this._buildSerializer(modelClass);
+            cache.set(modelClass, serializer);
+        }
+
+        return serializer;
+    },
+
+    _buildSerializer: function (modelClass) {
+        var properties = [],
+            propertyNamesForPost = [],
+            propertyNamesForPut = [],
+            serializer = {},
+            that = this;
+
+        modelClass.eachComputedProperty(function (propertyName) {
+            var propertyMetadata = modelClass.metaForProperty(propertyName);
+
+            if (propertyMetadata.type) {
+                properties.push($.extend({ name: propertyName }, propertyMetadata));
+            }
+        });
+
+        properties.forEach(function (property) {
+            if (property.operations.contains('post')) {
+                propertyNamesForPost.push(property.name);
+            }
+
+            if (property.operations.contains('put')) {
+                propertyNamesForPut.push(property.name);
+            }
+        });
+
+        serializer.serialize = modelClass.serialize || function (model, method) {
+            var serialized = (method || 'post').toLower() === 'post' ?
+                model.getProperties(propertyNamesForPost) : model.getProperties(propertyNamesForPut);
+
+            properties.forEach(function (property) {
+                if (serialized[property.name] === undefined) {
+                    serialized[property.name] = property.defaultValue;
+                } else {
+                    serialized[property.name] = that.serializerFor(property.type)
+                        .serialize(serialized[property.name], method || 'post');
+                }
+            });
+
+            return serialized;
+        };
+
+        serializer.deserialize = modelClass.deserialize || function (json) {
+            var model = modelClass.create();
+
+            properties.forEach(function (property) {
+                if (json[property.name] === undefined) {
+                    model.set(property.name, property.defaultValue);
+                } else {
+                    model.set(property.name, that.serializerFor(property.type).deserialize(json[property.name]));
+                }
+            });
+
+            return model;
+        };
+
+        return serializer;
+    }
+});
+/**
+@module milo-core
+*/
 
 var _validateNumber = function (count) {
     if (typeof count !== 'number' || count < 0) {
         throw 'Invalid index "' + count + '"';
     }
 };
-/**
-@module milo-core
-*/
+
+var _validateString = function (fieldName) {
+    if (typeof fieldName !== 'string') {
+        throw 'Ordering field must be a valid string';
+    }
+};
+
 
 /**
 @class Queryable
@@ -179,6 +466,7 @@ var _validateNumber = function (count) {
 */
 Milo.Queryable = Em.Mixin.create({
     orderBy: function (field) {
+        _validateString(field);
         this.set('orderByClause', {
             orderBy: field,
             order: 'asc'
@@ -188,6 +476,7 @@ Milo.Queryable = Em.Mixin.create({
     },
 
     orderByDescending: function (field) {
+        _validateString(field);
         this.set('orderByClause', {
             orderBy: field,
             order: 'desc'
@@ -198,18 +487,14 @@ Milo.Queryable = Em.Mixin.create({
 
     take: function (count) {
         _validateNumber(count);
-        this.set('takeClause', {
-            limit: count
-        });
+        this.set('takeClause', { limit: count });
 
         return this;
     },
 
     skip: function (count) {
         _validateNumber(count);
-        this.set('skipClause', {
-            offset: count
-        });
+        this.set('skipClause', { offset: count });
 
         return this;
     },
@@ -221,43 +506,57 @@ Milo.Queryable = Em.Mixin.create({
     },
 
     single: function () {
-        var proxy = Milo.Proxy.create({
-            deferred: $.Deferred()
+        return this._materialize(this.constructor, Milo.Proxy, function (deserialized) {
+            return Em.isArray(deserialized) ? deserialized[0] : deserialized;
         });
-
-        this.execQuery(proxy).done(function (data) {
-            //// TODO: Throw an exception if data.lenght > 1
-            proxy.set('content', this.constructor.create($.extend({}, this.get('meta'), data)));
-
-            proxy.get('deferred').resolve(proxy);
-        }.bind(this));
-
-        return proxy;
     },
 
     toArray: function () {
-        var results = Em.A(),
-            proxy = Milo.ArrayProxy.create({
+        return this._materialize(this.constructor, Milo.ArrayProxy, function (deserialized) {
+            return Em.isArray(deserialized) ? deserialized : Em.A([deserialized]);
+        });
+    },
+
+    _extractParameters: function () {
+        var params = [];
+
+        params.push(this.get('anyClause'));
+        params.push(this.get('orderByClause'));
+        params.push(this.get('takeClause'));
+        params.push(this.get('skipClause'));
+        params.push(Milo.Options.get('auth'));
+
+        return $.extend.apply(null, [{}].concat(params));
+    },
+
+    _materialize: function (modelClass, proxyClass, extractContentFromDeserialized) {
+        var params = this._extractParameters(),
+            proxy = proxyClass.create({
+                isLoading: true,
+                errors: null,
                 deferred: $.Deferred()
             });
 
-        this.execQuery(proxy).done(function (data) {
-            data[this.get('rootElement')].forEach(function (value) {
-                var result = this.constructor.create($.extend({}, this.get('meta'), value));
-
-                results.pushObject(result);
-            }.bind(this));
-
-            proxy.set('content', results);
-
-            proxy.get('deferred').resolve(proxy);
-        }.bind(this));
+        Milo.Options.get('defaultDadapter').query(modelClass, params)
+            .always(function () {
+                proxy.set('isLoading', false);
+            })
+            .fail(function (errors) {
+                proxy.set('errors', errors);
+                proxy.set('isError', true);
+                proxy.get('deferred').reject(errors);
+            })
+            .done(function (deserialized) {
+                proxy.set('content', extractContentFromDeserialized(deserialized));
+                proxy.get('deferred').resolve(proxy);
+            });
 
         return proxy;
     }
 });
-Milo.Model = Em.Object.extend(Milo.Queryable, Milo.DefaultAdapter, {
-    meta: {},
+
+Milo.Model = Em.Object.extend(Milo.Queryable, {
+    meta: Milo.property('string'),
 
     data: function () {
         if (!this.get('_data')) {
@@ -271,6 +570,8 @@ Milo.Model = Em.Object.extend(Milo.Queryable, Milo.DefaultAdapter, {
         this.get('data').forEach(function (element) {
             this.set(element.key, element.orig);
         }.bind(this));
+
+        this.set('isDirty', false);
     }
 });
 

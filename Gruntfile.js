@@ -6,7 +6,6 @@ module.exports = function (grunt) {
             src: ['app/src/namespace.js',
                 'app/src/core/options.js',
                 'app/src/dsl/uriTemplates.js',
-                'app/src/dsl/collection.js',
                 'app/src/dsl/property.js',
                 'app/src/core/deferred.js',
                 'app/src/core/proxy.js',

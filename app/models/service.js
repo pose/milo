@@ -16,5 +16,5 @@ App.Service = Milo.Model.extend({
         }
     }.property('lastVersion'),
 
-    versions: Milo.collection(App.Version)
+    versions: Milo.collection('App.Version')
 });

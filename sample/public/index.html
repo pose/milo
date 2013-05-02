@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta http-equiv="content-type" content="text/html; charset=utf-8" />
+    <title>Actor - Movie Database</title>
+    <script src="/static/js/jquery.js" type="text/javascript" charset="utf-8"></script>
+    <script src="/static/js/handlebars.js" type="text/javascript" charset="utf-8"></script>
+    <script src="/static/js/ember.js" type="text/javascript" charset="utf-8"></script>
+    <script src="/static/js/milo.js" type="text/javascript" charset="utf-8"></script>
+  </head>
+  <body>
+    <h1>Movie Database</h1>
+    <p>Actor retrieved: <span id="actor-name"> </span> </p>
+
+    </p>
+    <script type="text/javascript">
+      Milo.Options.set('baseUrl', 'http://localhost:3000/api%@');
+
+      Hollywood = Ember.Namespace.create({
+        revision: 1
+      });
+
+      Hollywood.Actor = Milo.Model.extend({
+        uriTemplate: Milo.UriTemplate('/actor/%@'),
+        name: Milo.property('string', { defaultValue: '' })
+      });
+    
+      var actor = Hollywood.Actor.find({ 'id': 42 }).single();
+      actor.done(function (data) {
+        $('#actor-name').text(data.get('name'));
+      }).fail(function () {
+        $('#actor-name').text('Oops actor could not be retrieved.');
+      });
+
+      
+    </script>
+  </body>
+</html>

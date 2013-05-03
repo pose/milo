@@ -6,6 +6,8 @@ App.Service = Milo.Model.extend({
     summary: Milo.property('string'),
     lastVersion: Milo.property('App.Version'),
     availableVersions: Milo.property('number'),
+    taxonomies: Milo.collection('App.Taxonomy', { embedded: true }),
+    versions: Milo.collection('App.Version'),
 
     versionId: function () {
         var lastVersion = this.get('lastVersion');
@@ -14,7 +16,5 @@ App.Service = Milo.Model.extend({
         } else {
             return '';
         }
-    }.property('lastVersion'),
-
-    versions: Milo.collection('App.Version')
+    }.property('lastVersion')
 });

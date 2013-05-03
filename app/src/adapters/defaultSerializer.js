@@ -35,6 +35,7 @@ Milo.DefaultSerializer = Em.Object.extend({
         var cache = Em.Map.create();
 
         cache.set('string', _defaultSerializer);
+        cache.set('object', _defaultSerializer);
         cache.set('boolean', _booleanSerializer);
         cache.set('array', _defaultSerializer);
         cache.set('number', _numberSerializer);
@@ -65,7 +66,7 @@ Milo.DefaultSerializer = Em.Object.extend({
         modelClass.eachComputedProperty(function (propertyName) {
             var propertyMetadata = modelClass.metaForProperty(propertyName);
 
-            if (propertyMetadata.type) {
+            if (propertyMetadata.type && propertyMetadata.embedded) {
                 properties.push($.extend({ name: propertyName }, propertyMetadata));
             }
         });
@@ -88,8 +89,14 @@ Milo.DefaultSerializer = Em.Object.extend({
                 if (serialized[property.name] === undefined) {
                     serialized[property.name] = property.defaultValue;
                 } else {
-                    serialized[property.name] = that.serializerFor(property.type)
-                        .serialize(serialized[property.name], method || 'post');
+                    if (property.occurrences === "one") {
+                        serialized[property.name] = that.serializerFor(property.type).serialize(model.get(property.name), method || 'post');
+                    } else {
+                        serialized[property.name] = Em.A();
+                        (model.get(property.name) || []).forEach(function (item) {
+                            serialized[property.name].pushObject(that.serializerFor(property.type).serialize(item, method || 'post'));
+                        });
+                    }
                 }
             });
 
@@ -103,7 +110,14 @@ Milo.DefaultSerializer = Em.Object.extend({
                 if (json[property.name] === undefined) {
                     model.set(property.name, property.defaultValue);
                 } else {
-                    model.set(property.name, that.serializerFor(property.type).deserialize(json[property.name]));
+                    if (property.occurrences === "one") {
+                        model.set(property.name, that.serializerFor(property.type).deserialize(json[property.name]));
+                    } else {
+                        model.set(property.name, Em.A());
+                        (json[property.name] || []).forEach(function (item) {
+                            model.get(property.name).pushObject(that.serializerFor(property.type).deserialize(item));
+                        });
+                    }
                 }
             });
 

@@ -1,5 +1,5 @@
 Milo.Model = Em.Object.extend(Milo.Queryable, {
-    meta: Milo.property('string'),
+    meta: Milo.property('object'),
 
     data: function () {
         if (!this.get('_data')) {
@@ -15,6 +15,14 @@ Milo.Model = Em.Object.extend(Milo.Queryable, {
         }.bind(this));
 
         this.set('isDirty', false);
+    },
+
+    save: function () {
+        Milo.Options.get('defaultAdapter').save(this.constructor, this);
+    },
+
+    remove: function () {
+        Milo.Options.get('defaultAdapter').remove(this.constructor, this);
     }
 });
 

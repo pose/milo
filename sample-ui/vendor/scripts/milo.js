@@ -174,7 +174,7 @@ Milo.DefaultAdapter = Em.Object.extend({
             queryParams = $.param(urlAndQueryParams.dataParams),
             method = 'GET',
             deferred = $.Deferred(),
-            meta = urlAndQueryParams.urlParams,
+            meta = { meta: urlAndQueryParams.urlParams },
             rootElement = modelClass.create().get('rootElement'),
             that = this;
 
@@ -185,12 +185,10 @@ Milo.DefaultAdapter = Em.Object.extend({
 
                 if (root && Em.isArray(root)) {
                     deserialized = Em.A(root.map(function (dataRow) {
-                        return that._deserialize(modelClass, $.extend({}, meta, dataRow));
-                        //return modelClass.create($.extend({}, meta, dataRow));
+                        return that._deserialize(modelClass, $.extend({}, meta, { id: dataRow.id }, dataRow));
                     }));
                 } else {
-                    deserialized = that._deserialize(modelClass, $.extend({}, meta, data));
-                    //deserialized = modelClass.create($.extend({}, meta, data));
+                    deserialized = that._deserialize(modelClass, $.extend({}, meta, { id: data.id } data));
                 }
 
                 deferred.resolve(deserialized);
@@ -204,56 +202,64 @@ Milo.DefaultAdapter = Em.Object.extend({
         return deferred.promise();
     },
 
-    save: function (model) {
-        var params,
-            url = Milo.Options.get('baseUrl').fmt(this.get('resourceUrl')),
-            method = this.get('isNew') ? 'POST' : 'PUT',
+    save: function (modelClass, model) {
+        var urlAndQueryParams = this._splitUrlAndDataParams(modelClass, model.get('meta')),
+            resourceUrl = this._buildResourceUrl(modelClass, urlAndQueryParams.urlParams),
+            url = Milo.Options.get('baseUrl') + resourceUrl,
+            queryParams = $.param($.extend({}, urlAndQueryParams.dataParams, Milo.Options.get('auth'))),
+            method = model.get('isNew') ? 'post' : 'put',
+            deferred = $.Deferred(),
             serialized;
 
-        params = $.param(Milo.Options.get('auth'));
         model.set('isSaving', true);
+        serialized = this._serialize(modelClass, model, method);
 
-        serialized = this.serialize(model);
-
-        return this._ajax(method, url + '?' + params, serialized)
-            .done(function () {
+        this._ajax(method, url + '?' + queryParams, serialized)
+            .done(function (data) {
                 console.log('saved');
-                console.log(Em.inspect(arguments));
                 model.set('isDirty', false);
                 model.set('isNew', false);
+                deferred.resolve(model);
             })
             .fail(function () {
                 console.log('failed');
-                console.log(Em.inspect(arguments));
+                model.set('errors', arguments);
+                deferred.reject(arguments);
             })
             .always(function () {
                 model.set('isSaving', false);
             });
+
+        return deferred.promise();
     },
 
-    remove: function (model) {
-        var params,
-            url = Milo.Options.get('baseUrl').fmt(this.get('resourceUrl')),
-            method = 'DELETE';
+    remove: function (modelClass, model) {
+        var urlAndQueryParams = this._splitUrlAndDataParams(modelClass, model.get('meta')),
+            resourceUrl = this._buildResourceUrl(modelClass, urlAndQueryParams.urlParams),
+            url = Milo.Options.get('baseUrl') + resourceUrl,
+            queryParams = $.param($.extend({}, urlAndQueryParams.dataParams, Milo.Options.get('auth'))),
+            method = 'delete',
+            deferred = $.Deferred();
 
-        params = $.param(Milo.Options.get('auth'));
         model.set('isDeleting', true);
 
-        return this._ajax(method, url + '?' + params).always
-            .done(function () {
+        this._ajax(method, url + '?' + queryParams)
+            .done(function (data) {
                 console.log('saved');
-                console.log(Em.inspect(arguments));
                 model.set('isDirty', false);
-                model.set('isNew', false);
                 model.set('isDeleted', true);
+                deferred.resolve(model);
             })
             .fail(function () {
                 console.log('failed');
-                console.log(Em.inspect(arguments));
+                model.set('errors', arguments);
+                deferred.reject(arguments);
             })
             .always(function () {
                 model.set('isDeleting', false);
             });
+
+        return deferred.promise();
     },
 
     _serialize: function (modelClass, model, method) {
@@ -365,6 +371,7 @@ Milo.DefaultSerializer = Em.Object.extend({
         var cache = Em.Map.create();
 
         cache.set('string', _defaultSerializer);
+        cache.set('object', _defaultSerializer);
         cache.set('boolean', _booleanSerializer);
         cache.set('array', _defaultSerializer);
         cache.set('number', _numberSerializer);
@@ -556,7 +563,7 @@ Milo.Queryable = Em.Mixin.create({
 });
 
 Milo.Model = Em.Object.extend(Milo.Queryable, {
-    meta: Milo.property('string'),
+    meta: Milo.property('object'),
 
     data: function () {
         if (!this.get('_data')) {
@@ -572,6 +579,14 @@ Milo.Model = Em.Object.extend(Milo.Queryable, {
         }.bind(this));
 
         this.set('isDirty', false);
+    },
+
+    save: function () {
+        Milo.Options.get('defaultAdapter').save(this.constructor, this);
+    },
+
+    remove: function () {
+        Milo.Options.get('defaultAdapter').remove(this.constructor, this);
     }
 });
 

@@ -1,8 +1,15 @@
+var _apiFromModelClass = function (modelClass) {
+        var modelClassName = modelClass.toString();
+
+        return Em.get(modelClassName.substring(0, modelClassName.indexOf('.')));
+    };
+
 Milo.DefaultAdapter = Em.Object.extend({
     query: function (modelClass, params) {
-        var urlAndQueryParams = this._splitUrlAndDataParams(modelClass, params),
+        var api = _apiFromModelClass(modelClass),
+            urlAndQueryParams = this._splitUrlAndDataParams(modelClass, params),
             resourceUrl = this._buildResourceUrl(modelClass, urlAndQueryParams.urlParams),
-            url = Milo.Options.get('baseUrl') + resourceUrl,
+            url = api.options('baseUrl') + resourceUrl,
             queryParams = $.param(urlAndQueryParams.dataParams),
             method = 'GET',
             deferred = $.Deferred(),
@@ -35,10 +42,11 @@ Milo.DefaultAdapter = Em.Object.extend({
     },
 
     save: function (modelClass, model) {
-        var urlAndQueryParams = this._splitUrlAndDataParams(modelClass, model.get('meta')),
+        var api = _apiFromModelClass(modelClass),
+            urlAndQueryParams = this._splitUrlAndDataParams(modelClass, model.get('meta')),
             resourceUrl = this._buildResourceUrl(modelClass, urlAndQueryParams.urlParams),
-            url = Milo.Options.get('baseUrl') + resourceUrl,
-            queryParams = $.param($.extend({}, urlAndQueryParams.dataParams, Milo.Options.get('auth'))),
+            url = api.options('baseUrl') + resourceUrl,
+            queryParams = $.param($.extend({}, urlAndQueryParams.dataParams, api.queryParams())),
             method = model.get('isNew') ? 'post' : 'put',
             deferred = $.Deferred(),
             serialized;
@@ -66,10 +74,11 @@ Milo.DefaultAdapter = Em.Object.extend({
     },
 
     remove: function (modelClass, model) {
-        var urlAndQueryParams = this._splitUrlAndDataParams(modelClass, model.get('meta')),
+        var api = _apiFromModelClass(modelClass),
+            urlAndQueryParams = this._splitUrlAndDataParams(modelClass, model.get('meta')),
             resourceUrl = this._buildResourceUrl(modelClass, urlAndQueryParams.urlParams),
-            url = Milo.Options.get('baseUrl') + resourceUrl,
-            queryParams = $.param($.extend({}, urlAndQueryParams.dataParams, Milo.Options.get('auth'))),
+            url = api.options('baseUrl') + resourceUrl,
+            queryParams = $.param($.extend({}, urlAndQueryParams.dataParams, api.queryParams())),
             method = 'delete',
             deferred = $.Deferred();
 
@@ -95,13 +104,15 @@ Milo.DefaultAdapter = Em.Object.extend({
     },
 
     _serialize: function (modelClass, model, method) {
-        var serializer = Milo.Options.get('defaultSerializer').serializerFor(modelClass);
+        var api = _apiFromModelClass(modelClass),
+            serializer = api.serializer().serializerFor(modelClass);
 
         return serializer.serialize(model, method);
     },
 
     _deserialize: function (modelClass, json) {
-        var serializer = Milo.Options.get('defaultSerializer').serializerFor(modelClass);
+        var api = _apiFromModelClass(modelClass),
+            serializer = api.serializer().serializerFor(modelClass);
 
         return serializer.deserialize(json);
     },

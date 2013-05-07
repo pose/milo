@@ -1,5 +1,7 @@
 var _mapProperty = function (property, key, value) {
-        if ('undefined' === typeof value && 'string' === typeof key) {
+        if ('undefined' === typeof key) {
+            return this.get(property);
+        } else if ('undefined' === typeof value && 'string' === typeof key) {
             return this.get(property)[key];
         } else if ('undefined' === typeof value && 'object' === typeof key) {
             this.set(property, $.extend({}, this.get(property), key));

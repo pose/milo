@@ -93,7 +93,7 @@ Milo.Queryable = Em.Mixin.create({
     },
 
     /** @method single
-     * This method excutes a query expecting to get a single element as a result, if not it will throw an exception
+     * @summary Single executes a query expecting to get a single element as a result, if not it will throw an exception
      * @example <caption>Example usage of find using params</caption>
      * Hollywood.Actor.find().single();
      **/
@@ -104,7 +104,7 @@ Milo.Queryable = Em.Mixin.create({
     },
 
     /** @method toArray 
-     * This method excutes a query expecting to get an array of element as a result
+     * @summary toArray executes a query expecting to get an array of element as a result
      * @example <caption>Example usage of find using params</caption>
      * Hollywood.Actor.find().toArray();
      **/

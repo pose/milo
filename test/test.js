@@ -1,11 +1,13 @@
 chai.should();
 var expect = chai.expect;
 
-
-// Cases
 // TODO What happens if there is no element returned in the query and I do .single?
 // TODO Support for multiple APIs (un-singletonize)
 // TODO Test always returning a proxy with deferred
+// XXX Why can't we remove operations array from the model?
+// XXX .fail() does not work
+// XXX What happens if JSON sent does not match the schema? Ans: There is not validation
+// First done parameter is foo
 
 describe('Milo', function () {
     describe('baseUrl', function () {
@@ -85,7 +87,7 @@ describe('Milo', function () {
             }).to.Throw(/uriTemplate not set in model/i);
         });
 
-        it('should make an ajax call when called find', function (d0ne) {
+        it('should make an ajax call', function (d0ne) {
             Milo.Options.set('baseUrl', 'https://myapi.com/api%@');
             Milo.Options.set('auth', {
                 access_token: 'token'
@@ -107,8 +109,6 @@ describe('Milo', function () {
             foo.should.have.property('isLoading', true);
             foo.should.have.property('done');
             foo.done(function (data) {
-                // XXX What happens if what is sent does not match the schema? Ans: There is not validation
-                // First done parameter is foo
                 foo.should.be.equal(data);
                 foo.should.have.property('isLoading', false);
                 foo.get('content').should.be.ok;
@@ -119,6 +119,24 @@ describe('Milo', function () {
             });
 
             $.get.should.have.been.calledWith('https://myapi.com/api/foo/42?access_token=token');
+        });
+    });
+    
+    describe('when called find on nested elements', function () {
+        var Fixture, xhr, requests;
+        beforeEach(function () {
+            xhr = sinon.useFakeXMLHttpRequest();
+            requests = [];
+            xhr.onCreate = function (xhr) {
+                requests.push(xhr);
+            };
+            Milo.Options.set('baseUrl', 'https://myurl/%@');
+            Fixture = Ember.Namespace.create({
+                revision: 1
+            });
+        });
+        afterEach(function () {
+            xhr.restore();
         });
 
         it('should fail if nested element is invalid', function () {
@@ -136,13 +154,11 @@ describe('Milo', function () {
             });
 
             Fixture.Bar = Milo.Model.extend({
-                rootElement: 'bar',
                 uriTemplate: Milo.UriTemplate('/bar/%@'),
                 name: Milo.property('string')
             });
 
             Fixture.Foo = Milo.Model.extend({
-                rootElement: 'foo',
                 uriTemplate: Milo.UriTemplate('/foo/%@'),
                 name: Milo.property('string', {
                     defaultValue: '',
@@ -157,14 +173,12 @@ describe('Milo', function () {
             Fixture.Foo.find({
                 id: 42
             })
-                .single()
-                .done(function (elem) {
+            .single()
+            .done(function (elem) {
                 throw "Not implemented";
                 //done();
             });
 
-            $.get.should.have.been.calledWith(
-                'https://myapi.com/api/foo/42?access_token=token');
         });
 
 
@@ -183,69 +197,9 @@ describe('Milo', function () {
 
     });
 
-    describe('Queryable', function () {
-        var queryable = Em.Object.extend(Milo.Queryable, {}).create();
-
-        // XXX Can I order by unexisting fields? Yes, we can't check that
-
-        it('must support order asc', function () {
-            queryable.orderBy('someField');
-            queryable.get('orderByClause').orderBy.should.equal('someField');
-            queryable.get('orderByClause').order.should.equal('asc');
-        });
-        it('must support order desc', function () {
-            queryable.orderByDescending('someField');
-            queryable.get('orderByClause').orderBy.should.equal('someField');
-            queryable.get('orderByClause').order.should.equal('desc');
-        });
-        it('must validate that order fields should be string', function () {
-            expect(queryable.orderByDescending,1).to.Throw(/Ordering field must be a valid string/i);
-            expect(queryable.orderBy,1).to.Throw(/Ordering field must be a valid string/i);
-            
-            expect(queryable.orderByDescending,'').to.Throw(/Ordering field must be a valid string/i);
-            expect(queryable.orderBy,'').to.Throw(/Ordering field must be a valid string/i);
-
-            expect(queryable.orderByDescending,undefined).to.Throw(/Ordering field must be a valid string/i);
-            expect(queryable.orderBy,undefined).to.Throw(/Ordering field must be a valid string/i);
-            
-        });
-        describe('take', function () {
-            it('should generate the clause', function () {
-                queryable.take(15);
-                queryable.get('takeClause').limit.should.equal(15);
-
-            });
-            it('should work with 0', function () {
-                queryable.take(0);
-                queryable.get('takeClause').limit.should.equal(0);
-            });
-            it('should not allow invalid indexes', function () {
-                expect(queryable.take, -14).to.Throw(/invalid index/i);
-                expect(queryable.take, 'hello').to.Throw(/invalid index/i);
-            });
-        });
-        describe('skip', function () {
-            it('should generate the caluse', function () {
-                queryable.skip(10);
-                queryable.get('skipClause').offset.should.equal(10);
-            });
-            it('should allow 0', function () {
-                queryable.skip(0);
-            });
-            it('should not allow invalid indexes', function () {
-                expect(queryable.skip, -4).to.Throw(/invalid index/i);
-                expect(queryable.skip, 'bar').to.Throw(/invalid index/i);
-            });
-        });
-        it('must support find', function () {
-            throw 'Not implemented';
-        });
-        it('must support single', function () {
-            queryable.single();
-            throw 'Not implemented';
-        });
-        it('must support toArray', function () {
-            throw 'Not implemented';
+    describe('if token is added', function () {
+        it('should add it to the request', function () {
+            throw "Not implemented";
         });
     });
 

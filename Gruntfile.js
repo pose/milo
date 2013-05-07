@@ -13,7 +13,8 @@ module.exports = function (grunt) {
                 'app/src/adapters/defaultAdapter.js',
                 'app/src/adapters/defaultSerializer.js',
                 'app/src/core/queryable.js',
-                'app/src/model.js']
+                'app/src/model.js',
+                'app/src/core/api.js']
         },
 
         concat: {

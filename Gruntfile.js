@@ -17,6 +17,8 @@ module.exports = function (grunt) {
                 'app/src/core/api.js']
         },
 
+        clean: ['app/dist'],
+
         concat: {
             dist: {
                 src: '<%= dirs.src %>',
@@ -65,10 +67,11 @@ module.exports = function (grunt) {
     grunt.loadNpmTasks('grunt-contrib-concat');
     grunt.loadNpmTasks('grunt-contrib-jshint');
     grunt.loadNpmTasks('grunt-contrib-uglify');
+    grunt.loadNpmTasks('grunt-contrib-clean');
     grunt.loadNpmTasks('grunt-jsdoc');
 
-    grunt.registerTask('dist', ['concat', 'uglify']);
-    grunt.registerTask('test', ['jshint', 'concat', 'mocha_phantomjs']);
+    grunt.registerTask('dist', ['clean', 'concat', 'uglify']);
+    grunt.registerTask('test', ['clean', 'jshint', 'concat', 'mocha_phantomjs']);
     grunt.registerTask('doc', ['jsdoc']);
     grunt.registerTask('ci', ['test', 'dist', 'doc']);
 };

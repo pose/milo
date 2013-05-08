@@ -72,14 +72,10 @@ module.exports = function (grunt) {
     grunt.loadNpmTasks('grunt-contrib-jshint');
     grunt.loadNpmTasks('grunt-contrib-uglify');
     grunt.loadNpmTasks('grunt-contrib-yuidoc');
-	grunt.loadNpmTasks('grunt-contrib-clean');
+    grunt.loadNpmTasks('grunt-contrib-clean');
 
     grunt.registerTask('dist', ['clean', 'concat', 'uglify']);
     grunt.registerTask('test', ['clean', 'jshint', 'concat', 'mocha_phantomjs']);
-    grunt.registerTask('doc', ['jsdoc']);
-};
-    grunt.registerTask('doc', ['jsdoc']);
-    grunt.registerTask('ci', ['test', 'dist', 'doc']);
-};
     grunt.registerTask('doc', ['yuidoc']);
+    grunt.registerTask('ci', ['test', 'dist', 'doc']);
 };

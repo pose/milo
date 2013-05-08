@@ -457,16 +457,18 @@ var _validateString = function (fieldName) {
 
 
 /**
-* @namespace Milo
-* @class Queryable
+    @namespace Milo
+    @module milo-core
+    @class Queryable
 */
 Milo.Queryable = Em.Mixin.create({
     /**
-     * @method orderBy
-     * @param {string} fieldname
-     * @example <caption>Example usage of orderBy</caption>
-     * Hollywood.Actor.orderBy('name').toArray();
-     **/
+        @method orderBy
+        @param {string} fieldname
+        @type {Milo.Queryable}
+        @example <caption>Example usage of orderBy</caption>
+        Hollywood.Actor.orderBy('name').toArray();
+    */
     orderBy: function (field) {
         _validateString(field);
         this.set('orderByClause', {
@@ -477,11 +479,13 @@ Milo.Queryable = Em.Mixin.create({
         return this;
     },
 
-    /** @method orderByDescending 
-     * @param {string} fieldname
-     * @example <caption>Example usage of orderByDescending</caption>
-     * Hollywood.Actor.orderByDescending('name').toArray();
-     **/
+    /**
+        @method orderByDescending 
+        @param {string} fieldname
+        @type {Milo.Queryable}
+        @example <caption>Example usage of orderByDescending</caption>
+        Hollywood.Actor.orderByDescending('name').toArray();
+    */
     orderByDescending: function (field) {
         _validateString(field);
         this.set('orderByClause', {
@@ -492,11 +496,12 @@ Milo.Queryable = Em.Mixin.create({
         return this;
     },
 
-    /** @method take
-     * @param {number} count
-     * @example <caption>Example usage of take</caption>
-     * Hollywood.Actor.take(3).toArray();
-    **/
+    /** 
+        @method take
+        @param {number} count
+        @example <caption>Example usage of take</caption>
+        Hollywood.Actor.take(3).toArray();
+    */
     take: function (count) {
         _validateNumber(count);
         this.set('takeClause', {
@@ -506,11 +511,12 @@ Milo.Queryable = Em.Mixin.create({
         return this;
     },
 
-    /** @method skip
-     * @param {number} count
-     * @example <caption>Example usage of skip</caption>
-     * Hollywood.Actor.skip(3).toArray();
-    **/
+    /** 
+        @method skip
+        @param {number} count
+        @example <caption>Example usage of skip</caption>
+        Hollywood.Actor.skip(3).toArray();
+    */
     skip: function (count) {
         _validateNumber(count);
         this.set('skipClause', {
@@ -520,35 +526,38 @@ Milo.Queryable = Em.Mixin.create({
         return this;
     },
 
-    /** @method find 
-     * @param {object} clause
-     * @example <caption>Example usage of find using params</caption>
-     * Hollywood.Actor.find({name: 'Robert De Niro'}).single();
-     * @example <caption>Example usage of find</caption>
-     * Hollywood.Actor.find().toArray();
-     **/
+    /** 
+        @method find 
+        @param {object} clause
+        @example <caption>Example usage of find using params</caption>
+        Hollywood.Actor.find({name: 'Robert De Niro'}).single();
+        @example <caption>Example usage of find</caption>
+        Hollywood.Actor.find().toArray();
+    */
     find: function (clause) {
         this.set('anyClause', $.extend({}, this.get('anyClause'), clause));
 
         return this;
     },
 
-    /** @method single
-     * @summary Single executes a query expecting to get a single element as a result, if not it will throw an exception
-     * @example <caption>Example usage of find using params</caption>
-     * Hollywood.Actor.find().single();
-     **/
+    /** 
+        @method single
+        @summary Single executes a query expecting to get a single element as a result, if not it will throw an exception
+        @example <caption>Example usage of find using params</caption>
+        Hollywood.Actor.find().single();
+    */
     single: function () {
         return this._materialize(this.constructor, Milo.Proxy, function (deserialized) {
             return Em.isArray(deserialized) ? deserialized[0] : deserialized;
         });
     },
 
-    /** @method toArray 
-     * @summary toArray executes a query expecting to get an array of element as a result
-     * @example <caption>Example usage of find using params</caption>
-     * Hollywood.Actor.find().toArray();
-     **/
+    /** 
+        @method toArray 
+        @summary toArray executes a query expecting to get an array of element as a result
+        @example <caption>Example usage of find using params</caption>
+        Hollywood.Actor.find().toArray();
+    */
     toArray: function () {
         return this._materialize(this.constructor, Milo.ArrayProxy, function (deserialized) {
             return Em.isArray(deserialized) ? deserialized : Em.A([deserialized]);

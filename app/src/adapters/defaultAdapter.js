@@ -4,7 +4,18 @@ var _apiFromModelClass = function (modelClass) {
         return Em.get(modelClassName.substring(0, modelClassName.indexOf('.')));
     };
 
+/**
+    @namespace Milo
+    @module milo-adapters
+    @class DefaultAdapter
+    @extends {Ember.Object}
+*/
 Milo.DefaultAdapter = Em.Object.extend({
+    /**
+        @method query
+        @param {String} modelClass
+        @param {Array} params
+    */
     query: function (modelClass, params) {
         var api = _apiFromModelClass(modelClass),
             urlAndQueryParams = this._splitUrlAndDataParams(modelClass, params),

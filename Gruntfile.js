@@ -17,7 +17,7 @@ module.exports = function (grunt) {
                 'app/src/core/api.js']
         },
 
-        clean: ['app/dist', 'sample-ui/vendor/scripts/<%= pkg.name %>.js'],
+        clean: ['app/doc', 'app/dist', 'sample-ui/vendor/scripts/<%= pkg.name %>.js'],
 
         concat: {
             dist: {
@@ -76,6 +76,6 @@ module.exports = function (grunt) {
 
     grunt.registerTask('dist', ['clean', 'concat', 'uglify']);
     grunt.registerTask('test', ['clean', 'jshint', 'concat', 'mocha_phantomjs']);
-    grunt.registerTask('doc', ['yuidoc']);
+    grunt.registerTask('doc', ['clean', 'yuidoc']);
     grunt.registerTask('ci', ['test', 'dist', 'doc']);
 };

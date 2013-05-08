@@ -41,10 +41,14 @@ module.exports = function (grunt) {
             }
         },
 
-        jsdoc: {
-            src: ['app/src/**/*.js', 'test/*.js'],
-            options: {
-                destination: 'app/doc'
+        yuidoc: {
+            compile: {
+                name: '<%= pkg.name %>',
+                version: '<%= pkg.version %>',
+                options: {
+                    paths: 'app/src',
+                    outdir: 'app/doc'
+                }
             }
         },
 
@@ -67,11 +71,15 @@ module.exports = function (grunt) {
     grunt.loadNpmTasks('grunt-contrib-concat');
     grunt.loadNpmTasks('grunt-contrib-jshint');
     grunt.loadNpmTasks('grunt-contrib-uglify');
-    grunt.loadNpmTasks('grunt-contrib-clean');
-    grunt.loadNpmTasks('grunt-jsdoc');
+    grunt.loadNpmTasks('grunt-contrib-yuidoc');
+	grunt.loadNpmTasks('grunt-contrib-clean');
 
     grunt.registerTask('dist', ['clean', 'concat', 'uglify']);
     grunt.registerTask('test', ['clean', 'jshint', 'concat', 'mocha_phantomjs']);
     grunt.registerTask('doc', ['jsdoc']);
+};
+    grunt.registerTask('doc', ['jsdoc']);
     grunt.registerTask('ci', ['test', 'dist', 'doc']);
+};
+    grunt.registerTask('doc', ['yuidoc']);
 };

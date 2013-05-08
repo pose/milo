@@ -1,6 +1,8 @@
 chai.should();
 var expect = chai.expect;
 
+// XXX Behaviour when trying to do queries without setting baseUrl
+
 describe('Core', function () {
     describe('initialization', function () {
         var API;
@@ -139,4 +141,73 @@ describe('Core', function () {
             API.serializer().should.be.equal(mockSerializer);
         });
     });
+    
+
+    describe('Options validation', function () {
+        var API, API2;
+
+        beforeEach(function () {
+            API = Milo.API.create(); 
+            API2 = Milo.API.create();
+        });
+
+        afterEach(function () {
+            API = undefined;
+            API2 = undefined;
+        });
+
+        it('should fail if baseUrl is set to undefined', function () {
+            // Arrange
+            var setToUndefined = function () { 
+                API.options('baseUrl', undefined);
+            };
+
+            // Act 
+            setToUndefined.
+            
+            // Assert
+            should.Throw(/not supported/i);
+        });
+
+        it('should fail if protocol set to smtp', function () {
+            // Arrange
+            var smtp = function () {
+                API.options('baseUrl', 'smtp://hello');
+            };
+            
+            // Act
+            smtp.
+            
+            // Assert
+            to.Throw(/smtp.*not supported/i);
+        });
+        
+        it('should fail if protocol set to unknown protocol', function () {
+            // Arrange
+            var unknown = function () {
+                API.options('baseUrl', 'bye://hello');
+            };
+            
+            // Act
+            unknown.
+            
+            // Assert
+            to.Throw(/bye.* not supported/i);
+        });
+
+        it('should work with http and https', function (done) {
+            // Arrange
+            var http = 'http://hello',  https = 'https://hello';
+
+            // Act
+            API.options('baseUrl', http);
+            API2.options('baseUrl', https);
+            
+            // Assert
+
+            // No exception should be thrown
+            done();
+        });
+    });
+
 });

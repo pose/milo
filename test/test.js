@@ -10,47 +10,6 @@ var expect = chai.expect;
 // First done parameter is foo
 
 describe('Milo', function () {
-    describe('baseUrl', function () {
-        var Fixture, nothing;
-
-        beforeEach(function () {
-            Fixture = Ember.Namespace.create({
-                revision: 1
-            });
-            Fixture.Foo = Milo.Model.extend({});
-            nothing = function () {};
-        });
-        afterEach(function () {
-        });
-
-        it('should fail if not set', function () {
-            expect(function () { 
-                Milo.Options.set('baseUrl', undefined);
-            }).to.Throw(/not supported/i);
-        });
-
-        it('should fail if set to an invalid protocol', function () {
-            expect(function () {
-                Milo.Options.set('baseUrl', 'smtp://hello');
-            }).to.Throw(/smtp.*not supported/i);
-
-            expect(function () {
-                Milo.Options.set('baseUrl', 'bye://hello');
-            }).to.Throw(/bye.* not supported/i);
-        });
-
-        it('should work with http and https', function () {
-            var http = 'http://hello',  https = 'https://hello';
-            Milo.Options.set('baseUrl', http);
-            Milo.Options.get('baseUrl').should.be.a('string');
-            Milo.Options.get('baseUrl').should.equal(http);
-            
-            Milo.Options.set('baseUrl', https);
-            Milo.Options.get('baseUrl').should.be.a('string');
-            Milo.Options.get('baseUrl').should.equal(https);
-        });
-    });
-
 
     describe('when called find', function () {
         var Fixture;

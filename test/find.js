@@ -2,7 +2,6 @@ chai.should();
 var expect = chai.expect;
 
 // TODO What happens if there is no element returned in the query and I do .single?
-// TODO Support for multiple APIs (un-singletonize)
 // TODO Test always returning a proxy with deferred
 // XXX Why can't we remove operations array from the model?
 // XXX .fail() does not work
@@ -10,50 +9,9 @@ var expect = chai.expect;
 // First done parameter is foo
 
 describe('Milo', function () {
-    describe('baseUrl', function () {
-        var Fixture, nothing;
-
-        beforeEach(function () {
-            Fixture = Ember.Namespace.create({
-                revision: 1
-            });
-            Fixture.Foo = Milo.Model.extend({});
-            nothing = function () {};
-        });
-        afterEach(function () {
-        });
-
-        it('should fail if not set', function () {
-            expect(function () { 
-                Milo.Options.set('baseUrl', undefined);
-            }).to.Throw(/not supported/i);
-        });
-
-        it('should fail if set to an invalid protocol', function () {
-            expect(function () {
-                Milo.Options.set('baseUrl', 'smtp://hello');
-            }).to.Throw(/smtp.*not supported/i);
-
-            expect(function () {
-                Milo.Options.set('baseUrl', 'bye://hello');
-            }).to.Throw(/bye.* not supported/i);
-        });
-
-        it('should work with http and https', function () {
-            var http = 'http://hello',  https = 'https://hello';
-            Milo.Options.set('baseUrl', http);
-            Milo.Options.get('baseUrl').should.be.a('string');
-            Milo.Options.get('baseUrl').should.equal(http);
-            
-            Milo.Options.set('baseUrl', https);
-            Milo.Options.get('baseUrl').should.be.a('string');
-            Milo.Options.get('baseUrl').should.equal(https);
-        });
-    });
-
 
     describe('when called find', function () {
-        var Fixture;
+        var API;
         beforeEach(function () {
             sinon.stub($, 'get', function (url) {
                 var defer = $.Deferred();
@@ -65,26 +23,27 @@ describe('Milo', function () {
                 }, 1000);
                 return defer.promise();
             });
-            Milo.Options.set('baseUrl', 'https://myurl/%@');
-            Milo.Options.set('auth', {
-                access_token: 'sometoken'
-            });
-            Fixture = Ember.Namespace.create({
-                revision: 1
-            });
+            API = Milo.API.create({});
+            API.options('baseUrl', 'https://myurl/%@');
+            API.options('auth', {access_token: 'sometoken'});
         });
+
         afterEach(function () {
             $.get.restore();
         });
+
         it('should fail if it does not contain properties', function () {
-            Milo.Options.set('baseUrl', 'https://myapi.com/api%@');
-            Milo.Options.set('auth', { access_token: 'token' });
+            // Arrange
+            API.options('baseUrl', 'https://myapi.com/api%@');
+            API.options('auth', { access_token: 'token' });
 
-            Fixture.Foo = Milo.Model.extend({});
+            // Act
+            API.Foo = Milo.Model.extend({});
 
-            expect(function () {
-                Fixture.Foo.find({ 'id': 42 }).single();
-            }).to.Throw(/uriTemplate not set in model/i);
+            // Assert
+            (function () {
+                API.Foo.find({ 'id': 42 }).single();
+            }).should.Throw(/uriTemplate not set in model/i);
         });
 
         it('should make an ajax call', function (d0ne) {
@@ -93,7 +52,7 @@ describe('Milo', function () {
                 access_token: 'token'
             });
 
-            Fixture.Foo = Milo.Model.extend({
+            API.Foo = Milo.Model.extend({
                 uriTemplate: Milo.UriTemplate('/foo/%@'),
                 name: Milo.property('string', {
                     defaultValue: '',
@@ -104,7 +63,7 @@ describe('Milo', function () {
                 })
             });
 
-            var foo = Fixture.Foo.find({ 'id': 42 }).single();
+            var foo = API.Foo.find({ 'id': 42 }).single();
             foo.should.not.equal(undefined);
             foo.should.have.property('isLoading', true);
             foo.should.have.property('done');
@@ -123,7 +82,7 @@ describe('Milo', function () {
     });
     
     describe('when called find on nested elements', function () {
-        var Fixture, xhr, requests;
+        var API, xhr, requests;
         beforeEach(function () {
             xhr = sinon.useFakeXMLHttpRequest();
             requests = [];
@@ -131,7 +90,7 @@ describe('Milo', function () {
                 requests.push(xhr);
             };
             Milo.Options.set('baseUrl', 'https://myurl/%@');
-            Fixture = Ember.Namespace.create({
+            API = Ember.Namespace.create({
                 revision: 1
             });
         });
@@ -153,12 +112,12 @@ describe('Milo', function () {
                 access_token: 'token'
             });
 
-            Fixture.Bar = Milo.Model.extend({
+            API.Bar = Milo.Model.extend({
                 uriTemplate: Milo.UriTemplate('/bar/%@'),
                 name: Milo.property('string')
             });
 
-            Fixture.Foo = Milo.Model.extend({
+            API.Foo = Milo.Model.extend({
                 uriTemplate: Milo.UriTemplate('/foo/%@'),
                 name: Milo.property('string', {
                     defaultValue: '',
@@ -167,10 +126,10 @@ describe('Milo', function () {
                         required: true
                     }
                 }),
-                bar: Milo.collection(Fixture.Bar)
+                bar: Milo.collection(API.Bar)
             });
 
-            Fixture.Foo.find({
+            API.Foo.find({
                 id: 42
             })
             .single()

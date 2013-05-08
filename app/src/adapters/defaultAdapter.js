@@ -4,7 +4,18 @@ var _apiFromModelClass = function (modelClass) {
         return Em.get(modelClassName.substring(0, modelClassName.indexOf('.')));
     };
 
+/**
+    @namespace Milo
+    @module milo-adapters
+    @class DefaultAdapter
+    @extends {Ember.Object}
+*/
 Milo.DefaultAdapter = Em.Object.extend({
+    /**
+        @method query
+        @param {String} modelClass
+        @param {Array} params
+    */
     query: function (modelClass, params) {
         var api = _apiFromModelClass(modelClass),
             urlAndQueryParams = this._splitUrlAndDataParams(modelClass, params),
@@ -103,6 +114,10 @@ Milo.DefaultAdapter = Em.Object.extend({
         return deferred.promise();
     },
 
+    /**
+        @method _serialize
+        @private
+    */
     _serialize: function (modelClass, model, method) {
         var api = _apiFromModelClass(modelClass),
             serializer = api.serializer().serializerFor(modelClass);
@@ -110,6 +125,10 @@ Milo.DefaultAdapter = Em.Object.extend({
         return serializer.serialize(model, method);
     },
 
+    /**
+        @method _deserialize
+        @private
+    */
     _deserialize: function (modelClass, json) {
         var api = _apiFromModelClass(modelClass),
             serializer = api.serializer().serializerFor(modelClass);
@@ -117,6 +136,10 @@ Milo.DefaultAdapter = Em.Object.extend({
         return serializer.deserialize(json);
     },
 
+    /**
+        @method _buildResourceUrl
+        @private
+    */
     _buildResourceUrl: function (modelClass, urlParams) {
         var urlTemplate = modelClass.create().get('uriTemplate'),
             urlTerms = modelClass.create().get('uriTemplate').split('/');
@@ -133,6 +156,10 @@ Milo.DefaultAdapter = Em.Object.extend({
         return resourceUrl.replace(/\/$/g, '');
     },
 
+    /**
+        @method _splitUrlAndDataParams
+        @private
+    */
     _splitUrlAndDataParams: function (modelClass, data) {
         var urlTerms = modelClass.create().get('uriTemplate').split('/'),
             modelClassName = modelClass.toString(),
@@ -160,6 +187,10 @@ Milo.DefaultAdapter = Em.Object.extend({
         return { urlParams: urlParams, dataParams: dataParams };
     },
 
+    /**
+        @method _ajax
+        @private
+    */
     _ajax: function (method, url, data, cache) {
         var cacheFlag = (method || 'GET') === 'GET' ? cache : true;
 

@@ -1,7 +1,8 @@
+// XXX Can I order by unexisting fields? Yes, we can't check that
+
 describe('Queryable', function () {
     var queryable = Em.Object.extend(Milo.Queryable, {}).create();
 
-    // XXX Can I order by unexisting fields? Yes, we can't check that
 
     it('must support order asc', function () {
         queryable.orderBy('someField');

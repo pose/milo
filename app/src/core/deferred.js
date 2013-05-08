@@ -1,14 +1,12 @@
 /**
-@module milo-core
-*/
-
-/**
-@class Deferred
-@namespace Milo
+    @namespace Milo
+    @module milo-core
+    @class Deferred
+    @extends {Ember.Mixin}
 */
 Milo.Deferred = Em.Mixin.create({
   /**
-    This method will be called when the  ...
+    This method will be called when the ajax request has successfully finished
 
     @method done
     @return {Milo.Deferred}
@@ -19,7 +17,7 @@ Milo.Deferred = Em.Mixin.create({
   },
 
   /**
-    This method will be called when the  ...
+    This method will be called when the ajax request fails
 
     @method fail
     @return {Milo.Deferred}

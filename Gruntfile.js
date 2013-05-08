@@ -17,6 +17,8 @@ module.exports = function (grunt) {
                 'app/src/core/api.js']
         },
 
+        clean: ['app/doc', 'app/dist', 'sample-ui/vendor/scripts/<%= pkg.name %>.js'],
+
         concat: {
             dist: {
                 src: '<%= dirs.src %>',
@@ -48,10 +50,14 @@ module.exports = function (grunt) {
             }
           }
         },
-        jsdoc: {
-            src: ['app/src/**/*.js', 'test/*.js'],
-            options: {
-                destination: 'website/docs'
+        yuidoc: {
+            compile: {
+                name: '<%= pkg.name %>',
+                version: '<%= pkg.version %>',
+                options: {
+                    paths: 'app/src',
+                    outdir: 'website/api'
+                }
             }
         },
 
@@ -81,9 +87,11 @@ module.exports = function (grunt) {
     grunt.loadNpmTasks('grunt-contrib-jshint');
     grunt.loadNpmTasks('grunt-contrib-uglify');
     grunt.loadNpmTasks('grunt-contrib-less');
-    grunt.loadNpmTasks('grunt-jsdoc');
+    grunt.loadNpmTasks('grunt-contrib-yuidoc');
+    grunt.loadNpmTasks('grunt-contrib-clean');
 
-    grunt.registerTask('dist', ['concat', 'uglify']);
-    grunt.registerTask('test', ['jshint', 'concat', 'mocha_phantomjs']);
-    grunt.registerTask('doc', ['less', 'jsdoc']);
+    grunt.registerTask('dist', ['clean', 'concat', 'uglify']);
+    grunt.registerTask('test', ['clean', 'jshint', 'concat', 'mocha_phantomjs']);
+    grunt.registerTask('doc', ['clean', 'less', 'yuidoc']);
+    grunt.registerTask('ci', ['test', 'dist', 'doc']);
 };

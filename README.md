@@ -1,20 +1,22 @@
-#Milo.js
+##Milo.js
 
-# Sample App
+[![Build Status](https://travis-ci.org/mulesoft/milo.png?branch=master)](https://travis-ci.org/mulesoft/milo)
+
+## Sample App
 
 In `sample-ui` directory you can find an example about how to use Milo.js with an [Ember.js](http://emberjs.com/) application.
 
-## Setup
+### Setup
 
 1. Run `npm install -g brunch` to install [Brunch](http://brunch.io/).
 2. Run `npm install .` inside the `sample-ui` directory to install the required dependencies.
 
-## Running the sample
+### Running the sample
 
 * Run `brunch watch --server`.
 * The application will be available at [http://localhost:3333](http://localhost:3333).
 
-# Building Milo.js
+## Building Milo.js
 
 1. Run `npm install .` to fetch the necessary npm packages.
 2. Run `grunt dist` to build Milo.js. Two builds will b e placed in the `dist` directory.
@@ -22,9 +24,9 @@ In `sample-ui` directory you can find an example about how to use Milo.js with a
 
 NOTE: Please be sure you already have installed [Node.js](http://nodejs.org/)
 
-# How to Run Unit Tests
+## How to Run Unit Tests
 
-## Setup
+### Setup
 
 In order to run the tests you need `mocha-phantomjs`. You can do it by installing:
 
@@ -32,12 +34,12 @@ In order to run the tests you need `mocha-phantomjs`. You can do it by installin
 2. Run `npm install -g grunt-cli.` to install [Grunt](http://gruntjs.com/getting-started).
 3. Run `npm install .` inside the project root to install the required npm packages.
 
-##  Running tests using Grunt
+###  Running tests using Grunt
 
 1. Go to the project root directory.
 2. Run `grunt test`.
 
-# Build documentation
+## Build documentation
 
 * From your local repository, run `grunt doc`
 * The documentation will be built into the `doc` directory

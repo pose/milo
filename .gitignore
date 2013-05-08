@@ -5,4 +5,6 @@ sample-ui/vendor/scripts/milo.js
 test/npm-debug.log
 website/stylesheets
 website/docs
+website/doc
+website/api
 .DS_Store

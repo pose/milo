@@ -17,7 +17,7 @@ module.exports = function (grunt) {
                 'app/src/core/api.js']
         },
 
-        clean: ['app/doc', 'app/dist', 'sample-ui/vendor/scripts/<%= pkg.name %>.js'],
+        clean: ['website/stylesheets', 'website/api', 'app/dist', 'sample-ui/vendor/scripts/<%= pkg.name %>.js'],
 
         concat: {
             dist: {

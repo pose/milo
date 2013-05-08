@@ -1,5 +1,7 @@
 #Milo.js
 
+[![Build Status](https://travis-ci.org/mulesoft/milo.png?branch=master)](https://travis-ci.org/mulesoft/milo)
+
 # Sample App
 
 In `sample-ui` directory you can find an example about how to use Milo.js with an [Ember.js](http://emberjs.com/) application.

@@ -17,6 +17,23 @@ var _mapProperty = function (property, key, value) {
           this.set(property, value);
           return value;
         }
+    },
+    _baseUrlValidation = function (value) {
+        var validScheme = ['http://', 'https://'].map(function (e) {
+                if (value) {
+                    return value.indexOf(e) === 0;
+                }
+                return false;
+            }).reduce(function (x,y) {
+                return x || y;
+            }, false);
+        
+        if (value && typeof value === 'string' && validScheme) {
+            _baseUrl = value;
+            return value;
+        }
+
+        throw 'Protocol "' + value + '" not supported.';
     };
 
 Milo.API = Em.Namespace.extend({
@@ -35,6 +52,9 @@ Milo.API = Em.Namespace.extend({
     },
 
     options: function (key, value) {
+        if ('baseUrl' === key && arguments.length === 2) {
+            _baseUrlValidation(value);
+        }
         return _mapProperty.bind(this)('_options', key, value);
     },
 

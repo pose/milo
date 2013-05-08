@@ -51,10 +51,7 @@ module.exports = function (grunt) {
         },
 
         mocha_phantomjs: {
-            all: ['test/**/*.html'],
-            options: {
-                C: ""
-            }
+            all: ['test/**/*.html']
         },
 
         watch: {

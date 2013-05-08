@@ -1,0 +1,184 @@
+// Base Imports
+@import "normalize.less";
+@import "preboot.less";
+@import "ubuntu.less";
+@import "batch.less";
+@import "colors.less";
+@import "syntax.less";
+
+body {
+  margin-top: 60px;
+}
+
+body header {
+  .make-row();
+  margin: auto;
+  width: 960px;
+  max-width: 960px;
+}
+
+body header nav {
+  .make-column(6);
+  .make-column-offset(6);
+  text-align: center;
+}
+
+body header nav a {
+  color: @violet;
+  font-family: Ubuntu;
+  font-size: 22px;
+  text-decoration: none;
+  text-transform: uppercase;
+  font-weight: 500;
+  line-height: 90px;
+  padding-right: 40px;
+}
+
+body header nav a:nth-last-of-type(1) {
+  padding-right: 0px;
+}
+
+body header div#title {
+  .make-row();
+}
+
+body header div#title h1 {
+  .make-column(6);
+  .make-column-offset(6);
+  padding-top: 30px;
+  text-align: center;
+  font-family: Ubuntu;
+  font-size: 65px;
+  text-decoration: none;
+  letter-spacing: -3px;
+  margin-bottom: 10px;
+}
+
+body div#slogan {
+  .make-row();
+  height: 370px;
+  background-color: @violet;
+}
+
+body div#slogan > div {
+  .make-row();
+  margin: auto;
+  width: 960px;
+  max-width: 960px;  
+}
+
+body div#slogan > div pre {
+  position: absolute;
+  top: 60px;
+  background-color: @darkViolet;  
+  width: 440px;
+  height: 700px;
+  .border-top-radius(10px);
+  .border-bottom-radius(10px);
+}
+
+body div#slogan > div img {
+  position: absolute;
+  top: 220px;
+  margin-left: 440px;
+  z-index: 1;
+}
+
+body div#slogan > div h2 {
+  color: white;
+  font-family: Ubuntu;
+  text-align: center;
+  font-weight: 200;
+  font-style: italic;
+  line-height: 55px;
+  font-size: 28px;
+  .make-column(6);
+  .make-column-offset(6);  
+}
+
+body div#slogan > div > div {
+  .make-column(6);
+  .make-column-offset(6);
+  text-align: center;
+}
+
+body div#slogan > div > div a:nth-last-of-type(1) {
+  margin-right: 0px;
+}
+
+body div#slogan > div > div a {
+  height: 55px;
+  display: inline-block;
+  border: solid 3px #8872b6;
+  text-decoration: none;
+  padding-top: 5px;
+  padding-bottom: 5px;
+  padding-left: 15px;
+  padding-right: 15px;
+  margin-right: 20px;
+  margin-top: 30px;
+  .border-top-radius(15px);
+  .border-bottom-radius(15px);
+  
+  // 0% c1bfea
+  // 31% c4c1ea
+  // 49% cec7ec
+  // 50% d8d0ef
+  // 79% e2def5
+  // 100% ebe9f9
+  
+  background-image: linear-gradient(bottom, rgb(193,191,234) 0%, rgb(195,193,234) 31%, rgb(206,199,236) 49%, rgb(216,208,239) 50%, rgb(226,222,245) 79%, rgb(235,233,249) 100%);
+  background-image: -o-linear-gradient(bottom, rgb(193,191,234) 0%, rgb(195,193,234) 31%, rgb(206,199,236) 49%, rgb(216,208,239) 50%, rgb(226,222,245) 79%, rgb(235,233,249) 100%);
+  background-image: -moz-linear-gradient(bottom, rgb(193,191,234) 0%, rgb(195,193,234) 31%, rgb(206,199,236) 49%, rgb(216,208,239) 50%, rgb(226,222,245) 79%, rgb(235,233,249) 100%);
+  background-image: -webkit-linear-gradient(bottom, rgb(193,191,234) 0%, rgb(195,193,234) 31%, rgb(206,199,236) 49%, rgb(216,208,239) 50%, rgb(226,222,245) 79%, rgb(235,233,249) 100%);
+  background-image: -ms-linear-gradient(bottom, rgb(193,191,234) 0%, rgb(195,193,234) 31%, rgb(206,199,236) 49%, rgb(216,208,239) 50%, rgb(226,222,245) 79%, rgb(235,233,249) 100%);
+
+  background-image: -webkit-gradient(
+  	linear,
+  	left bottom,
+  	left top,
+  	color-stop(0, rgb(193,191,234)),
+  	color-stop(0.31, rgb(195,193,234)),
+  	color-stop(0.49, rgb(206,199,236)),
+  	color-stop(0.5, rgb(216,208,239)),
+  	color-stop(0.79, rgb(226,222,245)),
+  	color-stop(1, rgb(235,233,249))
+  );  
+}
+
+body div#slogan > div > div a i {
+  height: 55px;
+  line-height: 55px;
+  display: inline-block;
+  color: #4a3b6a;
+}
+
+body div#slogan > div > div a span {
+  height: 55px;
+  line-height: 15px;
+  letter-spacing: -1px;
+  padding-top: 10px;
+  text-transform: uppercase;
+  display: inline-block;
+  color: #4a3b6a;
+  font-family: Ubuntu;
+  font-size: 23px;
+  font-weight: 500;
+  padding-left: 10px;
+  text-align: left;
+}
+
+body div#slogan > div > div a span em {
+  font-size: 12px;
+  font-style: normal;
+  color: #8971bc;
+  letter-spacing: normal;
+  text-transform: lowercase;
+}
+
+body article {
+  .make-row();
+  margin: auto;
+  width: 960px;
+  max-width: 960px;  
+}

@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Qutie</title>
+  <script src="javascript/rainbow-custom.min.js"></script>
+  <link href="stylesheets/milo.css" rel="stylesheet">
+</head>
+<body>
+  <header>
+    <nav>
+      <a href="/guides">Guides</a>
+      <a href="/api">API</a>
+      <a href="/community">Community</a>
+    </nav>
+    <div id="title">
+      <h1>MiloJS</h1>
+    </div>
+  </header>
+  <div id="slogan">
+    <div>
+      <h2>
+        &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;The JavaScript framework<br/>
+        &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;for building clients to<br/>
+        RESTful interfaces<br/>
+      </h2>
+      <div>
+        <a href="download">
+          <i class="batch-download batch-large"></i>
+          <span>
+            Download<br/><em>v1.0-pre1 | 51kb min+gzip</em>
+          </span>
+        </a>
+        <a href="http://github.com/mulesoft/milo">
+          <i class="batch-fork batch-large"></i>
+          <span>
+            Fork Us<br/><em>on GitHub</em>
+          </span>
+        </a>
+      </div>
+      <img src="assets/mascot.png"/>
+      <pre>
+        <code data-language="javascript">
+Hollywood.Movie = Milo.Model.extend({
+  uriTemplate: Milo.UriTemplate('/movies/:id'),
+  name: Milo.property('string')
+})
+
+Hollywood.Actor = Milo.Model.extend({
+  uriTemplate: Milo.UriTemplate('/actors/:id'),
+  firstName: Milo.property('string'),
+  lastName: Milo.property('string'),
+  movies: Milo.collection('Hollywood.Movie')
+});
+
+// retrieve Robert De Niro
+var actor = Hollywood.Actor
+       .find({ 'id': ‘robert-de-niro’ })
+       .single();
+
+// retrieve all movies with Robert De Niro
+var movies = Hollywood.Actor
+       .find({ 'id': ‘robert-de-niro’ })
+       .get('movies').find().toArray();      
+        </code>
+      </pre>
+    </div>
+  </div>
+  <article>
+    <section>
+      <h1>Declarative Model</h1>
+      <h2>Describe your APIs</h2>
+      <p>Milejs features a declarative model for describing interactions and data models in APIs in a very natural way</p>
+    </section>
+    <section>
+      <h1>Fluent Interface</h1>
+      <h2>Query your APIs</h2>
+      <p>Milejs features a declarative model for describing interactions and data models in APIs in a very natural way</p>
+    </section>
+    <section>
+      <h1>Made for Emberjs</h1>
+      <h2>Describe your APIs</h2>
+      <p>Milejs features a declarative model for describing interactions and data models in APIs in a very natural way</p>
+    </section>
+  </article>
+  <footer>
+  </footer>
+</body>
+</html>

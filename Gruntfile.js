@@ -38,11 +38,20 @@ module.exports = function (grunt) {
                 }
             }
         },
-
+        less: {
+          development: {
+            options: {
+              paths: ['website/less']
+            },
+            files: {
+              "website/stylesheets/milo.css": "website/less/milo.less"
+            }
+          }
+        },
         jsdoc: {
             src: ['app/src/**/*.js', 'test/*.js'],
             options: {
-                destination: 'app/doc'
+                destination: 'website/docs'
             }
         },
 
@@ -55,8 +64,14 @@ module.exports = function (grunt) {
         },
 
         watch: {
+          javascript: {
             files: ['app/src/**/*.js', 'test/*.js'],
             tasks: ['concat', 'jshint', 'mocha_phantomjs']
+          },
+          stylesheets: {
+            files: ['website/less/*.less'],
+            tasks: ['less']
+          }
         }
     });
 
@@ -65,9 +80,10 @@ module.exports = function (grunt) {
     grunt.loadNpmTasks('grunt-contrib-concat');
     grunt.loadNpmTasks('grunt-contrib-jshint');
     grunt.loadNpmTasks('grunt-contrib-uglify');
+    grunt.loadNpmTasks('grunt-contrib-less');
     grunt.loadNpmTasks('grunt-jsdoc');
 
     grunt.registerTask('dist', ['concat', 'uglify']);
     grunt.registerTask('test', ['jshint', 'concat', 'mocha_phantomjs']);
-    grunt.registerTask('doc', ['jsdoc']);
+    grunt.registerTask('doc', ['less', 'jsdoc']);
 };

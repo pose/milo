@@ -1,0 +1,46 @@
+@font-face {
+  font-family: Batch;
+  src: url('../assets/batch-icons-webfont.eot');
+  src: url('../assets/batch-icons-webfont.eot?#iefix') format('embedded-opentype'),
+       url('../assets/batch-icons-webfont.woff') format('woff'),
+       url('../assets/batch-icons-webfont.ttf') format('truetype'),
+       url('../assets/batch-icons-webfont.svg#batchregular') format('svg');
+  font-weight: normal;
+  font-style: normal;
+}
+
+[class^="batch-"],
+[class*=" batch-"] {
+  font-family: 'Batch';
+  font-weight: normal;
+  font-style: normal;
+  text-decoration: inherit;
+  display: inline;
+  width: auto;
+  height: auto;
+  line-height: normal;
+  vertical-align: baseline;
+  background-image: none !important;
+  background-position: 0% 0%;
+  background-repeat: repeat;
+}
+
+[class^="batch-"]:before,
+[class*=" batch-"]:before {
+  text-decoration: none;  // Customized
+  display: inline-block;
+  speak: none;
+}
+
+  
+.batch-download:before {
+  content: "\F0EA";
+}
+
+.batch-fork:before {
+  content: "\F0B3";
+}
+
+.batch-large { font-size:32px; }
+.batch-huge { font-size:64px; }
+.batch-natural { font-size:inherit; }

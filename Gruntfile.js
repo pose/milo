@@ -51,7 +51,10 @@ module.exports = function (grunt) {
         },
 
         mocha_phantomjs: {
-            all: ['test/**/*.html']
+            all: ['test/**/*.html'],
+            options: {
+                C: ""
+            }
         },
 
         watch: {
@@ -70,4 +73,5 @@ module.exports = function (grunt) {
     grunt.registerTask('dist', ['concat', 'uglify']);
     grunt.registerTask('test', ['jshint', 'concat', 'mocha_phantomjs']);
     grunt.registerTask('doc', ['jsdoc']);
+    grunt.registerTask('ci', ['test', 'dist', 'doc']);
 };

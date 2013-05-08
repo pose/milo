@@ -4,8 +4,14 @@ var _mapProperty = function (property, key, value) {
         } else if ('undefined' === typeof value && 'string' === typeof key) {
             return this.get(property)[key];
         } else if ('undefined' === typeof value && 'object' === typeof key) {
+            if (key.baseUrl) {
+                _baseUrlValidation(key.baseUrl);
+            }
             this.set(property, $.extend({}, this.get(property), key));
         } else {
+            if ('baseUrl' === key) {
+                _baseUrlValidation(value);
+            }
             this.get(property)[key] = value;
             return value;
         }
@@ -52,9 +58,6 @@ Milo.API = Em.Namespace.extend({
     },
 
     options: function (key, value) {
-        if ('baseUrl' === key && arguments.length === 2) {
-            _baseUrlValidation(value);
-        }
         return _mapProperty.bind(this)('_options', key, value);
     },
 

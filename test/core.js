@@ -208,6 +208,19 @@ describe('Core', function () {
             // No exception should be thrown :)
             done();
         });
+
+        it('should fail if baseUrl is set to undefined using a dictionary', function () {
+            // Arrange
+            var usingDictionary = function () {
+                API.options({baseUrl: 'lala://', auth: 'my-token'});
+            };
+
+            // Act 
+            usingDictionary.
+            
+            // Assert
+            should.Throw(/not supported/i);
+        });
     });
 
 });

@@ -179,7 +179,7 @@ describe('Core', function () {
             smtp.
             
             // Assert
-            to.Throw(/smtp.*not supported/i);
+            should.Throw(/smtp.*not supported/i);
         });
         
         it('should fail if protocol set to unknown protocol', function () {
@@ -192,7 +192,7 @@ describe('Core', function () {
             unknown.
             
             // Assert
-            to.Throw(/bye.* not supported/i);
+            should.Throw(/bye.* not supported/i);
         });
 
         it('should work with http and https', function (done) {
@@ -205,7 +205,7 @@ describe('Core', function () {
             
             // Assert
 
-            // No exception should be thrown
+            // No exception should be thrown :)
             done();
         });
     });

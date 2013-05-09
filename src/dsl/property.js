@@ -25,7 +25,7 @@ var _computedPropery = Ember.computed(function (key, value, oldValue) {
 */
 Milo.property = function (type, options) {
     options = options || {};
-    options.ocurrences = "one";
+    options.occurrences = "one";
     options.embedded = true;
     options.type = type || 'string';
     options.defaultValue = (options.defaultValue === undefined) ? null : options.defaultValue;
@@ -42,7 +42,7 @@ Milo.property = function (type, options) {
 */
 Milo.collection = function (type, options) {
     options = options || {};
-    options.ocurrences = "many";
+    options.occurrences = "many";
     options.embedded = options.embedded || false ? true : false;
     options.type = type || 'string';
     options.defaultValue = (options.defaultValue === undefined) ? null : options.defaultValue;

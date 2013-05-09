@@ -15,14 +15,26 @@ describe('Queryable', function () {
         queryable.get('orderByClause').order.should.equal('desc');
     });
     it('must validate that order fields should be string', function () {
-        expect(queryable.orderByDescending,1).to.Throw(/Ordering field must be a valid string/i);
-        expect(queryable.orderBy,1).to.Throw(/Ordering field must be a valid string/i);
+        (function() {
+            queryable.orderByDescending(1);
+        }).should.Throw(/Ordering field must be a valid string/i);
+        (function() {
+            queryable.orderBy(1);
+        }).should.Throw(/Ordering field must be a valid string/i);
         
-        expect(queryable.orderByDescending,'').to.Throw(/Ordering field must be a valid string/i);
-        expect(queryable.orderBy,'').to.Throw(/Ordering field must be a valid string/i);
+        (function() {
+            queryable.orderByDescending('');
+        }).should.Throw(/Ordering field must be a valid string/i);
+        (function() {
+            queryable.orderBy('');
+        }).should.Throw(/Ordering field must be a valid string/i);
 
-        expect(queryable.orderByDescending,undefined).to.Throw(/Ordering field must be a valid string/i);
-        expect(queryable.orderBy,undefined).to.Throw(/Ordering field must be a valid string/i);
+        (function() {
+            queryable.orderByDescending(undefined);
+        }).should.Throw(/Ordering field must be a valid string/i);
+        (function() {
+            queryable.orderBy(undefined);
+        }).should.Throw(/Ordering field must be a valid string/i);
         
     });
     describe('take', function () {
@@ -36,8 +48,12 @@ describe('Queryable', function () {
             queryable.get('takeClause').limit.should.equal(0);
         });
         it('should not allow invalid indexes', function () {
-            expect(queryable.take, -14).to.Throw(/invalid index/i);
-            expect(queryable.take, 'hello').to.Throw(/invalid index/i);
+            (function() {
+                queryable.take( -14);
+            }).should.Throw(/invalid index/i);
+            (function() {
+                queryable.take( 'hello');
+            }).should.Throw(/invalid index/i);
         });
     });
     describe('skip', function () {
@@ -49,8 +65,12 @@ describe('Queryable', function () {
             queryable.skip(0);
         });
         it('should not allow invalid indexes', function () {
-            expect(queryable.skip, -4).to.Throw(/invalid index/i);
-            expect(queryable.skip, 'bar').to.Throw(/invalid index/i);
+            (function() {
+                queryable.skip( -4);
+            }).should.Throw(/invalid index/i);
+            (function() {
+                queryable.skip( 'bar');
+            }).should.Throw(/invalid index/i);
         });
     });
 });

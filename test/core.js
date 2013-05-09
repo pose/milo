@@ -15,6 +15,10 @@ describe('Core', function () {
             API = undefined;
         });
 
+        it('should fail if destiny variable is not global (window)', function () {
+            throw "Not implemented";
+        });
+
         it('should create valid milo namespace', function () {
             // Act
             API = Milo.API.create();

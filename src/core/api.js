@@ -56,6 +56,7 @@ Milo.API = Em.Namespace.extend({
     _serializer: null,
 
     init: function () {
+        this._super();
         this.set('_options', {});
         this.set('_headers', {});
         this.set('_queryParams', {});

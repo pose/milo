@@ -1,10 +1,3 @@
-/**
-Some details about milo-adapters
-
-@module milo-adapters
-**/
-
-
 var _apiFromModelClass = function (modelClass) {
         var modelClassName = modelClass.toString();
 
@@ -52,7 +45,6 @@ Milo.DefaultAdapter = Em.Object.extend({
             })
             .fail(function () {
                 console.log('failed');
-                console.log(Em.inspect(arguments));
                 deferred.reject(arguments);
             });
 
@@ -158,9 +150,14 @@ Milo.DefaultAdapter = Em.Object.extend({
         @private
     */
     _buildResourceUrl: function (modelClass, urlParams) {
-        var urlTemplate = modelClass.create().get('uriTemplate'),
-            urlTerms = modelClass.create().get('uriTemplate').split('/');
-            resourceUrl = urlTemplate;
+        var uriTemplate = modelClass.create().get('uriTemplate');
+        if (!uriTemplate) {
+            throw 'Mandatory parameter uriTemplate not set in model "' + modelClass.toString() + '"';
+        }
+
+
+        var urlTerms = uriTemplate.split('/');
+            resourceUrl = uriTemplate;
 
         urlTerms.forEach(function (uriTerm) {
             var fieldName = uriTerm.replace(':', '');
@@ -178,7 +175,12 @@ Milo.DefaultAdapter = Em.Object.extend({
         @private
     */
     _splitUrlAndDataParams: function (modelClass, data) {
-        var urlTerms = modelClass.create().get('uriTemplate').split('/'),
+        var uriTemplate = modelClass.create().get('uriTemplate');
+        if (!uriTemplate) {
+            throw 'Mandatory parameter uriTemplate not set in model "' + modelClass.toString() + '"';
+        }
+
+        var urlTerms = uriTemplate.split('/'),
             modelClassName = modelClass.toString(),
             modelIdField = modelClassName.substring(modelClassName.indexOf('.') + 1).camelize() + 'Id',
             urlParams = {},
@@ -212,7 +214,7 @@ Milo.DefaultAdapter = Em.Object.extend({
         var cacheFlag = (method || 'GET') === 'GET' ? cache : true;
 
         return jQuery.ajax({
-            contentType: 'application/vnd.mulesoft.habitat+json', //TODO: Milo.Options.get('contentType'),
+            contentType: 'application/vnd.mulesoft.habitat+json',
             type: method || 'GET',
             dataType: (method || 'GET') === 'GET' ? 'json' : 'text',
             data: data ? JSON.stringify(data) : '',

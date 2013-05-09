@@ -149,6 +149,11 @@ Milo.Queryable = Em.Mixin.create({
         });
     },
 
+    _getModelClass: function () {
+        // XXX Hack that assumes that this is a Model Class
+        return this._getAPI(this);
+    },
+
     /**
     @method _extractParameters
     @private
@@ -160,7 +165,8 @@ Milo.Queryable = Em.Mixin.create({
         params.push(this.get('orderByClause'));
         params.push(this.get('takeClause'));
         params.push(this.get('skipClause'));
-        params.push(Milo.Options.get('auth'));
+        
+        params.push(this._getModelClass().options('auth'));
 
         return $.extend.apply(null, [{}].concat(params));
     },
@@ -175,9 +181,9 @@ Milo.Queryable = Em.Mixin.create({
                 isLoading: true,
                 errors: null,
                 deferred: $.Deferred()
-            });
+            }), apiFromModelClass = this._getModelClass();
 
-        Milo.Options.get('defaultDadapter').query(modelClass, params)
+        apiFromModelClass.adapter().query(modelClass, params)
             .always(function () {
             proxy.set('isLoading', false);
         })

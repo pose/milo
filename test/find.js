@@ -11,49 +11,45 @@ var expect = chai.expect;
 describe('Milo', function () {
 
     describe('when called find', function () {
-        var API;
+        var server;
+
         beforeEach(function () {
-            sinon.stub($, 'get', function (url) {
-                var defer = $.Deferred();
-                setTimeout(function () {
-                    defer.resolve({ 
-                        'id': 42,
-                        'name': 'Catch 22'
-                    });
-                }, 1000);
-                return defer.promise();
-            });
-            API = Milo.API.create({});
-            API.options('baseUrl', 'https://myurl/%@');
+            // API
+            window.API = Milo.API.create({});
+            API.options('baseUrl', 'https://myurl/');
             API.options('auth', {access_token: 'sometoken'});
+            
+            // Fake Server
+            server = sinon.fakeServer.create();
         });
 
         afterEach(function () {
-            $.get.restore();
+            window.API = undefined;
+            server.restore();
         });
 
         it('should fail if it does not contain properties', function () {
             // Arrange
-            API.options('baseUrl', 'https://myapi.com/api%@');
+            API.options('baseUrl', 'https://myapi.com/api');
             API.options('auth', { access_token: 'token' });
 
             // Act
-            API.Foo = Milo.Model.extend({});
+            window.API.Foo = Milo.Model.extend({});
 
             // Assert
             (function () {
-                API.Foo.find({ 'id': 42 }).single();
+                window.API.Foo.find({ 'id': 42 }).single();
             }).should.Throw(/uriTemplate not set in model/i);
         });
 
         it('should make an ajax call', function (d0ne) {
-            Milo.Options.set('baseUrl', 'https://myapi.com/api%@');
-            Milo.Options.set('auth', {
-                access_token: 'token'
-            });
+            // Arrange
+            API.options('baseUrl', 'https://myapi.com/api');
+            API.options('auth', { api_key: 'XXX' });
 
             API.Foo = Milo.Model.extend({
-                uriTemplate: Milo.UriTemplate('/foo/%@'),
+                uriTemplate: '/foo/:id',
+                id: Milo.property('number'),
                 name: Milo.property('string', {
                     defaultValue: '',
                     operations: ['put', 'post'],
@@ -62,40 +58,43 @@ describe('Milo', function () {
                     }
                 })
             });
+            
+            // Act 
+            var foo = API.Foo.find({'id':42}).single();
 
-            var foo = API.Foo.find({ 'id': 42 }).single();
+            // Assert
             foo.should.not.equal(undefined);
             foo.should.have.property('isLoading', true);
             foo.should.have.property('done');
             foo.done(function (data) {
                 foo.should.be.equal(data);
                 foo.should.have.property('isLoading', false);
+                // XXX Can't have a property named content, throw exception if found
                 foo.get('content').should.be.ok;
-                foo.get('content.id').should.be.equal(42);
-                foo.get('content.name').should.be.equal('Catch 22');
+                foo.get('id').should.be.equal(42);
+                foo.get('name').should.be.equal('Catch 22');
+                
+                server.requests.length.should.be.equal(1);
+                server.requests[0].url.should.be.equal("https://myapi.com/api/foo/42?api_key=XXX");
+    
+                
                 d0ne();
-
             });
-
-            $.get.should.have.been.calledWith('https://myapi.com/api/foo/42?access_token=token');
+            
+            server.requests[0].respond(200, { "Content-Type": "application/json" }, JSON.stringify({id: 42, name: 'Catch 22'}));
+            
         });
     });
     
     describe('when called find on nested elements', function () {
-        var API, xhr, requests;
+        var xhr, requests;
         beforeEach(function () {
-            xhr = sinon.useFakeXMLHttpRequest();
-            requests = [];
-            xhr.onCreate = function (xhr) {
-                requests.push(xhr);
-            };
-            Milo.Options.set('baseUrl', 'https://myurl/%@');
-            API = Ember.Namespace.create({
-                revision: 1
-            });
+            // API
+            window.API = Milo.API.create();
+            API.options('baseUrl', 'https://myurl/');
         });
         afterEach(function () {
-            xhr.restore();
+            window.API = undefined;
         });
 
         it('should fail if nested element is invalid', function () {
@@ -107,18 +106,20 @@ describe('Milo', function () {
             // (arrays should not be json as plain JSON)
             // XXX What is uriTemplate?
             // XXX Assert that an entity can't use array if rootElement is not set
-            Milo.Options.set('baseUrl', 'https://myapi.com/api%@');
-            Milo.Options.set('auth', {
+            API.options('baseUrl', 'https://myapi.com/api');
+            API.options('auth', {
                 access_token: 'token'
             });
 
             API.Bar = Milo.Model.extend({
-                uriTemplate: Milo.UriTemplate('/bar/%@'),
+                uriTemplate: '/bar/:id',
+                id: Milo.property('number'),
                 name: Milo.property('string')
             });
 
             API.Foo = Milo.Model.extend({
-                uriTemplate: Milo.UriTemplate('/foo/%@'),
+                uriTemplate: '/foo/"id',
+                id: Milo.property('number'),
                 name: Milo.property('string', {
                     defaultValue: '',
                     operations: ['put', 'post'],
@@ -158,6 +159,13 @@ describe('Milo', function () {
 
     describe('if token is added', function () {
         it('should add it to the request', function () {
+            throw "Not implemented";
+        });
+    });
+
+
+    describe('if setting a content type', function () {
+        it('must be added to the requests', function () {
             throw "Not implemented";
         });
     });

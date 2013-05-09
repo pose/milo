@@ -124,7 +124,7 @@ Milo.DefaultSerializer = Em.Object.extend({
                 if (json[property.name] === undefined) {
                     model.set(property.name, property.defaultValue);
                 } else {
-                    if (property.occurrences === "one") {
+                    if (property.occurrences === 'one') {
                         model.set(property.name, that.serializerFor(property.type).deserialize(json[property.name]));
                     } else {
                         model.set(property.name, Em.A());

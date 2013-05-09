@@ -28,6 +28,12 @@ var _defaultSerializer = {
         }
     };
 
+/**
+    @namespace Milo
+    @module milo-adapters
+    @class DefaultSerializer
+    @extends {Ember.Object}
+*/
 Milo.DefaultSerializer = Em.Object.extend({
     serializerCache: null,
 
@@ -43,6 +49,10 @@ Milo.DefaultSerializer = Em.Object.extend({
         this.set('serializerCache', cache);
     },
 
+    /**
+        @method serializeFor
+        @param {String} modelClass
+    */
     serializerFor: function (modelClass) {
         var cache = this.get('serializerCache'),
             serializer = cache.get(modelClass);
@@ -56,6 +66,10 @@ Milo.DefaultSerializer = Em.Object.extend({
         return serializer;
     },
 
+    /**
+        @method _buildSerializer
+        @private
+    */
     _buildSerializer: function (modelClass) {
         var properties = [],
             propertyNamesForPost = [],

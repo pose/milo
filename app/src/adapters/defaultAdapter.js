@@ -52,6 +52,11 @@ Milo.DefaultAdapter = Em.Object.extend({
         return deferred.promise();
     },
 
+    /**
+        @method save
+        @param {String} modelClass
+        @param {Array} params
+    */
     save: function (modelClass, model) {
         var api = _apiFromModelClass(modelClass),
             urlAndQueryParams = this._splitUrlAndDataParams(modelClass, model.get('meta')),
@@ -84,6 +89,11 @@ Milo.DefaultAdapter = Em.Object.extend({
         return deferred.promise();
     },
 
+    /**
+        @method remove
+        @param {String} modelClass
+        @param {Array} params
+    */
     remove: function (modelClass, model) {
         var api = _apiFromModelClass(modelClass),
             urlAndQueryParams = this._splitUrlAndDataParams(modelClass, model.get('meta')),

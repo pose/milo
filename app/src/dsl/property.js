@@ -18,6 +18,11 @@ var _computedPropery = Ember.computed(function (key, value, oldValue) {
     return temp.value;
 });
 
+/**
+    @namespace Milo
+    @module milo-dsl
+    @class property
+*/
 Milo.property = function (type, options) {
     options = options || {};
     options.ocurrences = "one";
@@ -30,6 +35,11 @@ Milo.property = function (type, options) {
     return _computedPropery.property().meta(options);
 };
 
+/**
+    @namespace Milo
+    @module milo-dsl
+    @class collection
+*/
 Milo.collection = function (type, options) {
     options = options || {};
     options.ocurrences = "many";

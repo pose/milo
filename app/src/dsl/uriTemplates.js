@@ -1,3 +1,8 @@
+/**
+    @namespace Milo
+    @module milo-dsl
+    @class UriTemplate
+*/
 Milo.UriTemplate = function (template, options) {
     options = options || {};
 

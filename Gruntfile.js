@@ -41,14 +41,14 @@ module.exports = function (grunt) {
             }
         },
         less: {
-          development: {
-            options: {
-              paths: ['website/less']
-            },
-            files: {
-              "website/stylesheets/milo.css": "website/less/milo.less"
+            development: {
+                options: {
+                    paths: ['website/less']
+                },
+                files: {
+                    "website/stylesheets/milo.css": "website/less/milo.less"
+                }
             }
-          }
         },
         yuidoc: {
             compile: {
@@ -70,14 +70,21 @@ module.exports = function (grunt) {
         },
 
         watch: {
-          javascript: {
-            files: ['app/src/**/*.js', 'test/*.js'],
-            tasks: ['concat', 'jshint', 'mocha_phantomjs']
-          },
-          stylesheets: {
-            files: ['website/less/*.less'],
-            tasks: ['less']
-          }
+            javascript: {
+                files: ['app/src/**/*.js', 'test/*.js'],
+                tasks: ['concat', 'jshint', 'mocha_phantomjs']
+            },
+            stylesheets: {
+                files: ['website/less/*.less'],
+                tasks: ['less']
+            }
+        },
+
+        zip: {
+            dist: {
+                src: ['app/dist/<%= pkg.name %>.min.js'],
+                dest: 'app/dist/<%= pkg.name %> - <%= pkg.version %>.zip'
+            }
         }
     });
 
@@ -89,8 +96,9 @@ module.exports = function (grunt) {
     grunt.loadNpmTasks('grunt-contrib-less');
     grunt.loadNpmTasks('grunt-contrib-yuidoc');
     grunt.loadNpmTasks('grunt-contrib-clean');
+    grunt.loadNpmTasks('grunt-zip');
 
-    grunt.registerTask('dist', ['clean', 'concat', 'uglify']);
+    grunt.registerTask('dist', ['clean', 'concat', 'uglify', 'zip']);
     grunt.registerTask('test', ['clean', 'jshint', 'concat', 'mocha_phantomjs']);
     grunt.registerTask('doc', ['clean', 'less', 'yuidoc']);
     grunt.registerTask('ci', ['test', 'dist', 'doc']);

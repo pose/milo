@@ -11,7 +11,7 @@ var _validateNumber = function (count) {
 };
 
 var _validateString = function (fieldName) {
-    if (typeof fieldName !== 'string') {
+    if (typeof fieldName !== 'string' || fieldName === '') {
         throw 'Ordering field must be a valid string';
     }
 };
@@ -160,11 +160,17 @@ Milo.Queryable = Em.Mixin.create({
     */
     _extractParameters: function () {
         var params = [];
+        
+        // TODO Fail earlier if Model Class is invalid
+        if (!this._getModelClass() || !this._getModelClass().options) {
+            throw 'Entity was created from a Milo.API instance not registered as a global';
+        }
 
         params.push(this.get('anyClause'));
         params.push(this.get('orderByClause'));
         params.push(this.get('takeClause'));
         params.push(this.get('skipClause'));
+
         
         params.push(this._getModelClass().options('auth'));
 

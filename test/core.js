@@ -8,7 +8,6 @@ describe('Core', function () {
         var API;
 
         beforeEach(function () {
-
         });
 
         afterEach(function () {
@@ -16,7 +15,15 @@ describe('Core', function () {
         });
 
         it('should fail if destiny variable is not global (window)', function () {
-            throw "Not implemented";
+            var API2 = Milo.API.create();
+
+            API2.Dog = Milo.Model.extend({
+                name: Milo.property('string')
+            });
+
+            (function () {
+                API2.Dog.find().single();
+            }).should.Throw(/Milo.API instance not registered as a global/i);
         });
 
         it('should create valid milo namespace', function () {
@@ -160,7 +167,7 @@ describe('Core', function () {
             API2 = undefined;
         });
 
-        it('should fail if baseUrl is set to undefined', function () {
+        it.skip('should fail if baseUrl is set to undefined', function () {
             // Arrange
             var setToUndefined = function () { 
                 API.options('baseUrl', undefined);

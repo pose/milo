@@ -1,41 +1,44 @@
 // XXX Can I order by unexisting fields? Yes, we can't check that
 
-describe('Queryable', function () {
+describe('Support in queries of', function () {
     var queryable = Em.Object.extend(Milo.Queryable, {}).create();
 
+    describe('ordering', function () {
 
-    it('must support order asc', function () {
-        queryable.orderBy('someField');
-        queryable.get('orderByClause').orderBy.should.equal('someField');
-        queryable.get('orderByClause').order.should.equal('asc');
-    });
-    it('must support order desc', function () {
-        queryable.orderByDescending('someField');
-        queryable.get('orderByClause').orderBy.should.equal('someField');
-        queryable.get('orderByClause').order.should.equal('desc');
-    });
-    it('must validate that order fields should be string', function () {
-        (function() {
-            queryable.orderByDescending(1);
-        }).should.Throw(/Ordering field must be a valid string/i);
-        (function() {
-            queryable.orderBy(1);
-        }).should.Throw(/Ordering field must be a valid string/i);
-        
-        (function() {
-            queryable.orderByDescending('');
-        }).should.Throw(/Ordering field must be a valid string/i);
-        (function() {
-            queryable.orderBy('');
-        }).should.Throw(/Ordering field must be a valid string/i);
+        it('must support order asc', function () {
+            queryable.orderBy('someField');
+            queryable.get('orderByClause').orderBy.should.equal('someField');
+            queryable.get('orderByClause').order.should.equal('asc');
+        });
+        it('must support order desc', function () {
+            queryable.orderByDescending('someField');
+            queryable.get('orderByClause').orderBy.should.equal('someField');
+            queryable.get('orderByClause').order.should.equal('desc');
+        });
+        it('must validate that order fields should be string', function () {
+            (function() {
+                queryable.orderByDescending(1);
+            }).should.Throw(/Ordering field must be a valid string/i);
+            (function() {
+                queryable.orderBy(1);
+            }).should.Throw(/Ordering field must be a valid string/i);
+            
+            (function() {
+                queryable.orderByDescending('');
+            }).should.Throw(/Ordering field must be a valid string/i);
+            (function() {
+                queryable.orderBy('');
+            }).should.Throw(/Ordering field must be a valid string/i);
 
-        (function() {
-            queryable.orderByDescending(undefined);
-        }).should.Throw(/Ordering field must be a valid string/i);
-        (function() {
-            queryable.orderBy(undefined);
-        }).should.Throw(/Ordering field must be a valid string/i);
-        
+            (function() {
+                queryable.orderByDescending(undefined);
+            }).should.Throw(/Ordering field must be a valid string/i);
+            (function() {
+                queryable.orderBy(undefined);
+            }).should.Throw(/Ordering field must be a valid string/i);
+            
+        });
+
     });
     describe('take', function () {
         it('should generate the clause', function () {

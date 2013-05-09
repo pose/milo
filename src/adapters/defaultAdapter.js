@@ -28,7 +28,7 @@ Milo.DefaultAdapter = Em.Object.extend({
             rootElement = modelClass.create().get('rootElement'),
             that = this;
 
-        this._ajax(method, url + '?' + queryParams)
+        this._ajax(api, method, url + '?' + queryParams)
             .done(function (data) {
                 var root = data[rootElement],
                     deserialized;
@@ -69,7 +69,7 @@ Milo.DefaultAdapter = Em.Object.extend({
         model.set('isSaving', true);
         serialized = this._serialize(modelClass, model, method);
 
-        this._ajax(method, url + '?' + queryParams, serialized)
+        this._ajax(api, method, url + '?' + queryParams, serialized)
             .done(function (data) {
                 console.log('saved');
                 model.set('isDirty', false);
@@ -104,7 +104,7 @@ Milo.DefaultAdapter = Em.Object.extend({
 
         model.set('isDeleting', true);
 
-        this._ajax(method, url + '?' + queryParams)
+        this._ajax(api, method, url + '?' + queryParams)
             .done(function (data) {
                 console.log('saved');
                 model.set('isDirty', false);
@@ -210,16 +210,18 @@ Milo.DefaultAdapter = Em.Object.extend({
         @method _ajax
         @private
     */
-    _ajax: function (method, url, data, cache) {
-        var cacheFlag = (method || 'GET') === 'GET' ? cache : true;
+    _ajax: function (api, method, url, data, cache) {
+        var cacheFlag = (method || 'GET') === 'GET' ? cache : true,
+            contentType = api.headers('Content-Type') || 'application/json';
 
         return jQuery.ajax({
-            contentType: 'application/vnd.mulesoft.habitat+json',
+            contentType: contentType,
             type: method || 'GET',
             dataType: (method || 'GET') === 'GET' ? 'json' : 'text',
             data: data ? JSON.stringify(data) : '',
             url: url,
             headers: {
+                // XXX Unhardcode
                 accept: 'application/vnd.mulesoft.habitat+json'
             },
             cache: cacheFlag

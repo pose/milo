@@ -1,20 +1,20 @@
-module.exports = function(grunt) {
+module.exports = function (grunt) {
   grunt.initConfig({
     pkg: grunt.file.readJSON('package.json'),
 
     dirs: {
-      src: ['src/namespace.js', 
-      'src/core/options.js', 
-      'src/dsl/uriTemplates.js', 
-      'src/dsl/property.js', 
-      'src/core/deferred.js',
-      'src/core/proxy.js', 
-      'src/core/arrayProxy.js', 
-      'src/adapters/defaultAdapter.js', 
-      'src/adapters/defaultSerializer.js', 
-      'src/core/queryable.js', 
-      'src/model.js', 
-      'src/core/api.js']
+      src: ['src/namespace.js',
+        'src/core/options.js',
+        'src/dsl/uriTemplates.js',
+        'src/dsl/property.js',
+        'src/core/deferred.js',
+        'src/core/proxy.js',
+        'src/core/arrayProxy.js',
+        'src/adapters/defaultAdapter.js',
+        'src/adapters/defaultSerializer.js',
+        'src/core/queryable.js',
+        'src/model.js',
+        'src/core/api.js']
     },
 
     clean: ['website/stylesheets', 'website/api', 'dist', 'sample-ui/vendor/scripts/<%= pkg.name %>.js'],
@@ -125,6 +125,7 @@ module.exports = function(grunt) {
   grunt.loadNpmTasks('grunt-contrib-clean');
   grunt.loadNpmTasks('grunt-contrib-connect');
   grunt.loadNpmTasks('grunt-string-replace');
+  grunt.loadNpmTasks('grunt-zip');
 
   grunt.registerTask('dist', ['clean', 'concat', 'uglify', 'zip']);
   grunt.registerTask('test', ['clean', 'jshint', 'concat', 'mocha_phantomjs']);

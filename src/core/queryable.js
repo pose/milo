@@ -1,4 +1,6 @@
 /**
+Some details about milo-adapters
+
 @module milo-core
 */
 
@@ -16,6 +18,8 @@ var _validateString = function (fieldName) {
 
 
 /**
+    Some details about Milo.Queryable
+
     @namespace Milo
     @module milo-core
     @class Queryable

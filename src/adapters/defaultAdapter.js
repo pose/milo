@@ -1,3 +1,10 @@
+/**
+Some details about milo-adapters
+
+@module milo-adapters
+**/
+
+
 var _apiFromModelClass = function (modelClass) {
         var modelClassName = modelClass.toString();
 

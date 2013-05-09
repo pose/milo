@@ -5,8 +5,37 @@
 @import "batch.less";
 @import "colors.less";
 @import "syntax.less";
+@import "yuidoc.less";
+
+.gradient() {
+  // 0% c1bfea
+  // 31% c4c1ea
+  // 49% cec7ec
+  // 50% d8d0ef
+  // 79% e2def5
+  // 100% ebe9f9
+
+  background-image: linear-gradient(bottom, rgb(193,191,234) 0%, rgb(195,193,234) 31%, rgb(206,199,236) 49%, rgb(216,208,239) 50%, rgb(226,222,245) 79%, rgb(235,233,249) 100%);
+  background-image: -o-linear-gradient(bottom, rgb(193,191,234) 0%, rgb(195,193,234) 31%, rgb(206,199,236) 49%, rgb(216,208,239) 50%, rgb(226,222,245) 79%, rgb(235,233,249) 100%);
+  background-image: -moz-linear-gradient(bottom, rgb(193,191,234) 0%, rgb(195,193,234) 31%, rgb(206,199,236) 49%, rgb(216,208,239) 50%, rgb(226,222,245) 79%, rgb(235,233,249) 100%);
+  background-image: -webkit-linear-gradient(bottom, rgb(193,191,234) 0%, rgb(195,193,234) 31%, rgb(206,199,236) 49%, rgb(216,208,239) 50%, rgb(226,222,245) 79%, rgb(235,233,249) 100%);
+  background-image: -ms-linear-gradient(bottom, rgb(193,191,234) 0%, rgb(195,193,234) 31%, rgb(206,199,236) 49%, rgb(216,208,239) 50%, rgb(226,222,245) 79%, rgb(235,233,249) 100%);
+
+  background-image: -webkit-gradient(
+  	linear,
+  	left bottom,
+  	left top,
+  	color-stop(0, rgb(193,191,234)),
+  	color-stop(0.31, rgb(195,193,234)),
+  	color-stop(0.49, rgb(206,199,236)),
+  	color-stop(0.5, rgb(216,208,239)),
+  	color-stop(0.79, rgb(226,222,245)),
+  	color-stop(1, rgb(235,233,249))
+  );  
+}
 
 body {
+  font-family: Ubuntu;
   margin-top: 60px;
 }
 
@@ -17,15 +46,17 @@ body header {
   max-width: 960px;
 }
 
+body header h1 {
+  .make-column(6);
+}
+
 body header nav {
   .make-column(6);
-  .make-column-offset(6);
   text-align: center;
 }
 
 body header nav a {
   color: @violet;
-  font-family: Ubuntu;
   font-size: 22px;
   text-decoration: none;
   text-transform: uppercase;
@@ -47,7 +78,6 @@ body header div#title h1 {
   .make-column-offset(6);
   padding-top: 30px;
   text-align: center;
-  font-family: Ubuntu;
   font-size: 65px;
   text-decoration: none;
   letter-spacing: -3px;
@@ -86,7 +116,6 @@ body div#slogan > div img {
 
 body div#slogan > div h2 {
   color: white;
-  font-family: Ubuntu;
   text-align: center;
   font-weight: 200;
   font-style: italic;
@@ -119,31 +148,7 @@ body div#slogan > div > div a {
   margin-top: 30px;
   .border-top-radius(15px);
   .border-bottom-radius(15px);
-  
-  // 0% c1bfea
-  // 31% c4c1ea
-  // 49% cec7ec
-  // 50% d8d0ef
-  // 79% e2def5
-  // 100% ebe9f9
-  
-  background-image: linear-gradient(bottom, rgb(193,191,234) 0%, rgb(195,193,234) 31%, rgb(206,199,236) 49%, rgb(216,208,239) 50%, rgb(226,222,245) 79%, rgb(235,233,249) 100%);
-  background-image: -o-linear-gradient(bottom, rgb(193,191,234) 0%, rgb(195,193,234) 31%, rgb(206,199,236) 49%, rgb(216,208,239) 50%, rgb(226,222,245) 79%, rgb(235,233,249) 100%);
-  background-image: -moz-linear-gradient(bottom, rgb(193,191,234) 0%, rgb(195,193,234) 31%, rgb(206,199,236) 49%, rgb(216,208,239) 50%, rgb(226,222,245) 79%, rgb(235,233,249) 100%);
-  background-image: -webkit-linear-gradient(bottom, rgb(193,191,234) 0%, rgb(195,193,234) 31%, rgb(206,199,236) 49%, rgb(216,208,239) 50%, rgb(226,222,245) 79%, rgb(235,233,249) 100%);
-  background-image: -ms-linear-gradient(bottom, rgb(193,191,234) 0%, rgb(195,193,234) 31%, rgb(206,199,236) 49%, rgb(216,208,239) 50%, rgb(226,222,245) 79%, rgb(235,233,249) 100%);
-
-  background-image: -webkit-gradient(
-  	linear,
-  	left bottom,
-  	left top,
-  	color-stop(0, rgb(193,191,234)),
-  	color-stop(0.31, rgb(195,193,234)),
-  	color-stop(0.49, rgb(206,199,236)),
-  	color-stop(0.5, rgb(216,208,239)),
-  	color-stop(0.79, rgb(226,222,245)),
-  	color-stop(1, rgb(235,233,249))
-  );  
+  .gradient();
 }
 
 body div#slogan > div > div a i {
@@ -161,7 +166,6 @@ body div#slogan > div > div a span {
   text-transform: uppercase;
   display: inline-block;
   color: #4a3b6a;
-  font-family: Ubuntu;
   font-size: 23px;
   font-weight: 500;
   padding-left: 10px;
@@ -176,9 +180,35 @@ body div#slogan > div > div a span em {
   text-transform: lowercase;
 }
 
-body article {
+body article#main {
   .make-row();
-  margin: auto;
+  margin-left: auto;
+  margin-right: auto;
+  margin-top: 120px;
   width: 960px;
   max-width: 960px;  
+}
+
+body article section {
+  .make-column(4); 
+}
+
+body article section h1 i {
+  color: @violet;
+  display: inline-block;
+}
+
+body article section h1 span {
+  font-size: 22px;
+  line-height: 22px;
+  font-weight: 500;
+  display: inline-block;
+  vertical-align: bottom;
+}
+
+body article section h1 span em {
+  font-size: 18px;
+  font-weight: 300;
+  font-style: normal;
+  color: @violet;
 }

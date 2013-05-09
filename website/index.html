@@ -3,16 +3,17 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Qutie</title>
+  <title>Milojs</title>
   <script src="javascript/rainbow-custom.min.js"></script>
   <link href="stylesheets/milo.css" rel="stylesheet">
 </head>
 <body>
   <header>
+    <h1></h1>
     <nav>
-      <a href="/guides">Guides</a>
-      <a href="api/index.html">API</a>
-      <a href="/community">Community</a>
+      <a href="/guides.html">Guides</a>
+      <a href="/api/index.html">API</a>
+      <a href="/community.html">Community</a>
     </nav>
     <div id="title">
       <h1>MiloJS</h1>
@@ -40,7 +41,7 @@
         </a>
       </div>
       <img src="assets/mascot.png"/>
-      <pre>
+      <pre id="main">
         <code data-language="javascript">
 Hollywood.Movie = Milo.Model.extend({
   uriTemplate: Milo.UriTemplate('/movies/:id'),
@@ -67,20 +68,32 @@ var movies = Hollywood.Actor
       </pre>
     </div>
   </div>
-  <article>
+  <article id="main">
     <section>
-      <h1>Declarative Model</h1>
-      <h2>Describe your APIs</h2>
+      <h1>
+        <i class="batch-brackets batch-xlarge"></i>
+        <span>
+        Declarative Model<br/><em>Describe your APIs</em>
+        </span>
+      </h1>
       <p>Milejs features a declarative model for describing interactions and data models in APIs in a very natural way</p>
     </section>
     <section>
-      <h1>Fluent Interface</h1>
-      <h2>Query your APIs</h2>
+      <h1>
+        <i class="batch-fluent batch-xlarge"></i>
+        <span>
+        Fluent Interface<br/><em>Query your APIs</em>
+        </span>
+      </h1>
       <p>Milejs features a declarative model for describing interactions and data models in APIs in a very natural way</p>
     </section>
     <section>
-      <h1>Made for Emberjs</h1>
-      <h2>Describe your APIs</h2>
+      <h1>
+        <i class="batch-interop batch-xlarge"></i>
+        <span>
+        Made for Emberjs<br/><em>KVC model</em>
+        </span>
+      </h1>
       <p>Milejs features a declarative model for describing interactions and data models in APIs in a very natural way</p>
     </section>
   </article>

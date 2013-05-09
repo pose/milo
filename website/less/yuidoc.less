@@ -1,0 +1,122 @@
+body header h1 {
+  display: inline-block;
+  float: left;
+  font-family: Ubuntu;
+  font-size: 32px;
+  letter-spacing: -3px;
+  margin: 0px;
+}
+
+body header h1 a {
+  color: black;
+  text-decoration: none;
+  line-height: 90px;
+}
+
+body div#content {
+  .make-row();
+  margin: auto;
+  width: 960px;
+  max-width: 960px;  
+}
+
+body div#content aside {
+  .make-column(4);
+}
+
+body div#content article {
+  .make-column(8);
+}
+
+body div#content aside > div {
+  border-left: solid 2px #8872b6;
+  border-right: solid 2px #8872b6;
+  border-bottom: solid 2px #8872b6;
+  background-color: #e8e6f8;
+}
+
+body div#content aside > div:nth-of-type(1) {
+  border: solid 2px #8872b6;
+}
+
+body div#content aside div.hd {
+  .gradient();
+  border-bottom: solid 2px #8872b6;
+}
+
+body div#content aside div.hd h2 {
+  margin: 0px;
+  text-transform: uppercase;
+  font-size: 13px;
+  font-weight: 500;
+  color: #8872b6;
+  height: 30px;
+  line-height: 30px;
+  padding-left: 15px;
+}
+
+body div#content ul {
+  padding-left: 15px;
+}
+
+body div#content ul li {
+  list-style: none;
+  line-height: 25px;
+}
+
+body div#content ul li a {
+  color: #8872b6;
+  font-size: 12px;
+  text-decoration: none;
+}
+
+body div#content article h2 {
+  font-size: 20px;
+  text-transform: uppercase;
+  color: #8872b6;
+  margin-top: 7px;
+  border-bottom: solid 2px #8872b6;
+}
+
+body div#content article h3 {
+  font-size: 14px;
+  font-weight: 400;
+  text-transform: uppercase;
+  color: @violet;
+  margin-top: 40px;
+}
+
+body div#content div.method:nth-of-type(1) {
+  border-top: none;
+}
+
+body div#content div.method {
+  border-top: solid 1px #8872b6;
+  padding-top: 20px;
+}
+
+body div#content div.method p {
+  font-weight: 300;
+}
+
+body div#content div.method.private {
+  visibility: hidden;
+}
+
+body div#content div.method strong.name {
+  color: black;
+  font-weight: 700;
+  font-size: 18px;
+}
+
+
+body div#content div.method strong {
+  color: @violet;
+  font-weight: 500;
+  font-size: 16px;
+}
+
+body div#content span.method-parameters {
+  font-style: italic;
+  font-weight: 300;
+}

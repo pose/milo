@@ -1,0 +1,48 @@
+<a name="methods_{{name}}"></a>
+<div class="method item{{#if access}} {{access}}{{/if}}">
+    {{#if final}}<code>final</code> {{/if}}<strong class="name">{{name}}</strong>&nbsp;<span class="method-parameters">({{paramsList}})</span> {{#if access}}<em>`/* {{access}} method */`</em>{{/if}}
+    <br>
+    {{{methodDescription}}}
+    {{#if params}}
+    <strong>Parameters:</strong>
+    <ul class="params">
+    {{#params}}
+        <li>
+        {{#if optional}}
+            `[{{name}}{{#if optdefault}}={{optdefault}}{{/if}}]` <strong>&lt;{{#crossLink type}}{{/crossLink}}&gt;</strong>
+        {{else}}
+            `{{name}}` <strong>&lt;{{#crossLink type}}{{/crossLink}}&gt;</strong>
+        {{/if}}
+        {{#if multiple}}
+            <abbr title="Denotes that this argument can contain (n) number">(*..n)</abbr>
+        {{/if}}
+        {{{description}}}
+            {{#if props}}
+            <ul>
+            {{#props}}
+                <li>`{{name}}` <strong>&lt;{{#crossLink type}}{{/crossLink}}&gt;</strong> {{{description}}}
+                {{#if props}}
+                    <ul>
+                        {{#props}}
+                            <li>`{{name}}` <strong>&lt;{{#crossLink type}}{{/crossLink}}&gt;</strong> {{{description}}} </li>
+                        {{/props}}
+                    </ul>
+                {{/if}}
+                </li>
+            {{/props}}
+            </ul>
+            {{/if}}
+        </li>
+    {{/params}}
+    </ul>
+    {{/if}}
+    {{#if return}}
+    {{#return}}
+    <br><div class="returns"><strong>Returns:</strong> {{#if type}}&lt;{{#crossLink type}}{{/crossLink}}&gt; {{/if}}{{{description}}}</div>
+    {{/return}}
+    {{/if}}
+    {{#if example}}
+        <br/><strong>Example:</strong><br/><br/>
+        {{{example}}}
+    {{/if}}
+</div>

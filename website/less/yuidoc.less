@@ -1,3 +1,11 @@
+body#contrast {
+  background-color: #4a3b6a;
+}
+
+body#contrast header nav a {
+  color: white;
+}
+
 body header h1 {
   display: inline-block;
   float: left;
@@ -8,7 +16,7 @@ body header h1 {
 }
 
 body header h1 a {
-  color: black;
+  color: white;
   text-decoration: none;
   line-height: 90px;
 }
@@ -32,7 +40,7 @@ body div#content aside > div {
   border-left: solid 2px #8872b6;
   border-right: solid 2px #8872b6;
   border-bottom: solid 2px #8872b6;
-  background-color: #e8e6f8;
+  background-color: #362f45;
 }
 
 body div#content aside > div:nth-of-type(1) {
@@ -46,6 +54,7 @@ body div#content aside div.hd {
 
 body div#content aside div.hd h2 {
   margin: 0px;
+  color: white;
   text-transform: uppercase;
   font-size: 13px;
   font-weight: 500;
@@ -60,13 +69,14 @@ body div#content ul {
 }
 
 body div#content ul li {
+  color: white;
   list-style: none;
   line-height: 25px;
 }
 
 body div#content ul li a {
   color: #8872b6;
-  font-size: 12px;
+  font-size: 13px;
   text-decoration: none;
 }
 
@@ -82,7 +92,7 @@ body div#content article h3 {
   font-size: 14px;
   font-weight: 400;
   text-transform: uppercase;
-  color: @violet;
+  color: #8872b6;
   margin-top: 40px;
 }
 
@@ -95,28 +105,57 @@ body div#content div.method {
   padding-top: 20px;
 }
 
-body div#content div.method p {
+body div#content div.method p,
+body div#content div.intro p {
+  color: white;
   font-weight: 300;
+  font-size: 14px;
 }
 
 body div#content div.method.private {
   visibility: hidden;
+  height: 0px;
 }
 
 body div#content div.method strong.name {
-  color: black;
+  color: white;
   font-weight: 700;
   font-size: 18px;
 }
 
 
 body div#content div.method strong {
-  color: @violet;
+  color: #b6a7d4;
   font-weight: 500;
   font-size: 16px;
 }
 
 body div#content span.method-parameters {
+  color: white;
   font-style: italic;
   font-weight: 300;
+}
+
+body div#classdocs > ul {
+  padding: 0px;
+  height: 40px;
+  line-height: 40px;
+  .gradient();
+  border: solid 2px #8872b6;  
+}
+
+body div#classdocs > ul li {
+  padding: 0px;
+  height: 40px;
+  line-height: 40px;
+  padding-left: 15px;
+  padding-right: 15px;
+  border-right: solid 2px #8872b6;  
+}
+
+body div#classdocs > ul li a {
+  padding: 0px;
+  height: 40px;
+  line-height: 40px;
+  text-transform: uppercase;
 }

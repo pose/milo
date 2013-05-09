@@ -3,15 +3,26 @@ module.exports = function(grunt) {
     pkg: grunt.file.readJSON('package.json'),
 
     dirs: {
-      src: ['app/src/namespace.js', 'app/src/core/options.js', 'app/src/dsl/uriTemplates.js', 'app/src/dsl/property.js', 'app/src/core/deferred.js', 'app/src/core/proxy.js', 'app/src/core/arrayProxy.js', 'app/src/adapters/defaultAdapter.js', 'app/src/adapters/defaultSerializer.js', 'app/src/core/queryable.js', 'app/src/model.js', 'app/src/core/api.js']
+      src: ['src/namespace.js', 
+      'src/core/options.js', 
+      'src/dsl/uriTemplates.js', 
+      'src/dsl/property.js', 
+      'src/core/deferred.js',
+      'src/core/proxy.js', 
+      'src/core/arrayProxy.js', 
+      'src/adapters/defaultAdapter.js', 
+      'src/adapters/defaultSerializer.js', 
+      'src/core/queryable.js', 
+      'src/model.js', 
+      'src/core/api.js']
     },
 
-    clean: ['website/stylesheets', 'website/api', 'app/dist', 'sample-ui/vendor/scripts/<%= pkg.name %>.js'],
+    clean: ['website/stylesheets', 'website/api', 'dist', 'sample-ui/vendor/scripts/<%= pkg.name %>.js'],
 
     concat: {
       dist: {
         src: '<%= dirs.src %>',
-        dest: 'app/dist/<%= pkg.name %>.js'
+        dest: 'dist/<%= pkg.name %>.js'
       },
       sentToExample: {
         src: '<%= dirs.src %>',
@@ -25,7 +36,7 @@ module.exports = function(grunt) {
           report: 'gzip'
         },
         files: {
-          'app/dist/<%= pkg.name %>.min.js': '<%= dirs.src %>'
+          'dist/<%= pkg.name %>.min.js': '<%= dirs.src %>'
         }
       }
     },
@@ -45,7 +56,7 @@ module.exports = function(grunt) {
         name: '<%= pkg.name %>',
         version: '<%= pkg.version %>',
         options: {
-          paths: 'app/src',
+          paths: 'src',
           outdir: 'website/api',
           themedir: 'website/theme',
           "no-code": true
@@ -60,7 +71,7 @@ module.exports = function(grunt) {
     },
     watch: {
       javascript: {
-        files: ['app/src/**/*.js', 'test/*.js'],
+        files: ['src/**/*.js', 'test/*.js'],
         tasks: ['concat', 'jshint', 'mocha_phantomjs']
       },
       stylesheets: {

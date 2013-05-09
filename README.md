@@ -5,7 +5,7 @@
 ## Sample App
 
 In `sample-ui` directory you can find an example about how to use Milo.js with an [Ember.js](http://emberjs.com/) application.
-
+ 
 ### Setup
 
 1. Run `npm install -g brunch` to install [Brunch](http://brunch.io/).

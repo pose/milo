@@ -221,11 +221,11 @@ describe('Milo', function () {
                         author.should.be.equal(data);
                         author.should.have.property('isLoading', false);
 
-                        author[0].get('id').should.be.equal(23);
-                        author[0].get('name').should.be.equal('Joseph Heller');
-                        
-                        author[1].get('id').should.be.equal(24);
-                        author[1].get('name').should.be.equal('Julio Cortázar');
+                        author.objectAt(0).get('id').should.be.equal(23);
+                        author.objectAt(0).get('name').should.be.equal('Joseph Heller');
+
+                        author.objectAt(1).get('id').should.be.equal(24);
+                        author.objectAt(1).get('name').should.be.equal('Julio Cortázar');
 
                         server.requests.length.should.be.equal(1);
                         server.requests[0].url.should.be.equal("https://myapi.com/api/book/42/authors?");

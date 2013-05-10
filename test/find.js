@@ -10,7 +10,7 @@ var expect = chai.expect;
 // First done parameter is foo
 
 
-describe('when called find', function () {
+describe('Find', function () {
     var server;
 
     beforeEach(function () {
@@ -126,7 +126,7 @@ describe('when called find', function () {
     });
 
 
-    it('single must not throw an exception and pick the first element of the array if query returns more than one element', function (done) {
+    it('single must pick the first element of the array if query returns more than one element', function (done) {
         // Arrange
         API.Author = Milo.Model.extend({
             uriTemplate: '/book/:bookId/authors',

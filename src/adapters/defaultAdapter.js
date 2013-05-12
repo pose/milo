@@ -10,16 +10,17 @@ Milo.DefaultAdapter = Em.Object.extend({
         @param {String} modelClass
         @param {Array} params
     */
-    query: function (modelClass, params) {
+    query: function (modelClass, params, queryable) {
         var api = Milo.Helpers.apiFromModelClass(modelClass),
-            urlAndQueryParams = this._splitUrlAndDataParams(modelClass, params),
-            resourceUrl = this._buildResourceUrl(modelClass, urlAndQueryParams.urlParams),
+            uriTemplate = queryable.get('uriTemplate');
+            urlAndQueryParams = this._splitUrlAndDataParams(modelClass, params, uriTemplate),
+            resourceUrl = this._buildResourceUrl(modelClass, urlAndQueryParams.urlParams, uriTemplate),
             url = api.options('baseUrl') + resourceUrl,
             queryParams = $.param(urlAndQueryParams.dataParams),
             method = 'GET',
             deferred = $.Deferred(),
             meta = { meta: urlAndQueryParams.urlParams },
-            rootElement = modelClass.create().get('rootElement'),
+            rootElement = queryable.get('rootElement'),
             that = this;
 
         this._ajax(api, method, url + '?' + queryParams)
@@ -143,12 +144,14 @@ Milo.DefaultAdapter = Em.Object.extend({
         @method _buildResourceUrl
         @private
     */
-    _buildResourceUrl: function (modelClass, urlParams) {
-        var uriTemplate = modelClass.create().get('uriTemplate');
+    _buildResourceUrl: function (modelClass, urlParams, uriTemplate) {
+        if ('undefined' === typeof uriTemplate) {
+            uriTemplate = modelClass.create().get('uriTemplate');
+        }
+
         if (!uriTemplate) {
             throw 'Mandatory parameter uriTemplate not set in model "' + modelClass.toString() + '"';
         }
-
 
         var urlTerms = uriTemplate.split('/');
             resourceUrl = uriTemplate;
@@ -168,8 +171,11 @@ Milo.DefaultAdapter = Em.Object.extend({
         @method _splitUrlAndDataParams
         @private
     */
-    _splitUrlAndDataParams: function (modelClass, data) {
-        var uriTemplate = modelClass.create().get('uriTemplate');
+    _splitUrlAndDataParams: function (modelClass, data, uriTemplate) {
+        if ('undefined' === typeof uriTemplate) {
+            uriTemplate = modelClass.create().get('uriTemplate');
+        }
+
         if (!uriTemplate) {
             throw 'Mandatory parameter uriTemplate not set in model "' + modelClass.toString() + '"';
         }

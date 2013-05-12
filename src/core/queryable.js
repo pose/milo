@@ -122,7 +122,7 @@ Milo.Queryable = Em.Mixin.create({
             Hollywood.Actor.findOne();
     */
     findOne: function () {
-        return this._materialize(this.constructor, Milo.Proxy, function (deserialized) {
+        return this._materialize(Milo.Proxy, function (deserialized) {
             return Em.isArray(deserialized) ? deserialized[0] : deserialized;
         });
     },
@@ -136,7 +136,7 @@ Milo.Queryable = Em.Mixin.create({
             Hollywood.Actor.find().toArray();
     */
     findMany: function () {
-        return this._materialize(this.constructor, Milo.ArrayProxy, function (deserialized) {
+        return this._materialize(Milo.ArrayProxy, function (deserialized) {
             return Em.isArray(deserialized) ? deserialized : Em.A([deserialized]);
         });
     },
@@ -173,27 +173,29 @@ Milo.Queryable = Em.Mixin.create({
     @method _materialize
     @private
     */
-    _materialize: function (modelClass, proxyClass, extractContentFromDeserialized) {
-        var params = this._extractParameters(),
+    _materialize: function (proxyClass, extractContentFromDeserialized) {
+        var modelClass = this.constructor,
+            params = this._extractParameters(),
             proxy = proxyClass.create({
                 isLoading: true,
                 errors: null,
                 deferred: $.Deferred()
-            }), apiFromModelClass = this._getModelClass();
+            }), 
+            apiFromModelClass = this._getModelClass();
 
-        apiFromModelClass.adapter().query(modelClass, params)
+        apiFromModelClass.adapter().query(modelClass, params, this)
             .always(function () {
-            proxy.set('isLoading', false);
-        })
+                proxy.set('isLoading', false);
+            })
             .fail(function (errors) {
-            proxy.set('errors', errors);
-            proxy.set('isError', true);
-            proxy.get('deferred').reject(errors);
-        })
+                proxy.set('errors', errors);
+                proxy.set('isError', true);
+                proxy.get('deferred').reject(errors);
+            })
             .done(function (deserialized) {
-            proxy.set('content', extractContentFromDeserialized(deserialized));
-            proxy.get('deferred').resolve(proxy);
-        });
+                proxy.set('content', extractContentFromDeserialized(deserialized));
+                proxy.get('deferred').resolve(proxy);
+            });
 
         return proxy;
     }

@@ -80,7 +80,7 @@ describe('Find', function () {
     it('should handle nested entities', function (done) {
         // Arrange
         API.Author = Milo.Model.extend({
-            uriTemplate: '/book/:bookId/authors',
+            uriTemplate: '/authors/:id',
             rootElement: 'authors',
             id: Milo.property('number'),
             name: Milo.property('string')
@@ -128,7 +128,7 @@ describe('Find', function () {
     it('findOne must pick the first element of the array if query returns more than one element', function (done) {
         // Arrange
         API.Author = Milo.Model.extend({
-            uriTemplate: '/book/:bookId/authors',
+            uriTemplate: '/authors/:id',
             rootElement: 'authors',
             id: Milo.property('number'),
             name: Milo.property('string')
@@ -175,7 +175,7 @@ describe('Find', function () {
     it('should work and return collection if using findMany', function (done) {
         // Arrange
         API.Author = Milo.Model.extend({
-            uriTemplate: '/book/:bookId/authors',
+            uriTemplate: '/authors/:id',
             rootElement: 'authors',
             id: Milo.property('number'),
             name: Milo.property('string')

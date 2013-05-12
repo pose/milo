@@ -160,14 +160,18 @@ Milo.collection = function (type, options) {
         return Ember.computed(function (key, value, oldValue) {
             var parentName = this.constructor.toString(),
                 param = '%@Id'.fmt(parentName.substring(parentName.indexOf('.') + 1, parentName.length)).camelize(),
-                findParams = JSON.parse(JSON.stringify(this.get('anyClause') || {}));
-
-            type = (typeof(type) === 'string') ? Em.get(type) : type;
+                findParams = JSON.parse(JSON.stringify(this.get('anyClause') || {})),
+                queryable, uriTemplate;
 
             findParams[param] = findParams.id || this.get('id');
             delete findParams.id;
 
-            return type.where(findParams);
+            type = (typeof(type) === 'string') ? Em.get(type) : type;
+            queryable = type.create();
+            uriTemplate = queryable.get('uriTemplate');
+            queryable.set('uriTemplate', this.get('uriTemplate').replace(':id', ':' + param) + uriTemplate);
+
+            return queryable.where(findParams);
         }).property().volatile().meta(options);
     }
 };
@@ -326,16 +330,17 @@ Milo.DefaultAdapter = Em.Object.extend({
         @param {String} modelClass
         @param {Array} params
     */
-    query: function (modelClass, params) {
+    query: function (modelClass, params, queryable) {
         var api = Milo.Helpers.apiFromModelClass(modelClass),
-            urlAndQueryParams = this._splitUrlAndDataParams(modelClass, params),
-            resourceUrl = this._buildResourceUrl(modelClass, urlAndQueryParams.urlParams),
+            uriTemplate = queryable.get('uriTemplate');
+            urlAndQueryParams = this._splitUrlAndDataParams(modelClass, params, uriTemplate),
+            resourceUrl = this._buildResourceUrl(modelClass, urlAndQueryParams.urlParams, uriTemplate),
             url = api.options('baseUrl') + resourceUrl,
             queryParams = $.param(urlAndQueryParams.dataParams),
             method = 'GET',
             deferred = $.Deferred(),
             meta = { meta: urlAndQueryParams.urlParams },
-            rootElement = modelClass.create().get('rootElement'),
+            rootElement = queryable.get('rootElement'),
             that = this;
 
         this._ajax(api, method, url + '?' + queryParams)
@@ -459,12 +464,14 @@ Milo.DefaultAdapter = Em.Object.extend({
         @method _buildResourceUrl
         @private
     */
-    _buildResourceUrl: function (modelClass, urlParams) {
-        var uriTemplate = modelClass.create().get('uriTemplate');
+    _buildResourceUrl: function (modelClass, urlParams, uriTemplate) {
+        if ('undefined' === typeof uriTemplate) {
+            uriTemplate = modelClass.create().get('uriTemplate');
+        }
+
         if (!uriTemplate) {
             throw 'Mandatory parameter uriTemplate not set in model "' + modelClass.toString() + '"';
         }
-
 
         var urlTerms = uriTemplate.split('/');
             resourceUrl = uriTemplate;
@@ -484,8 +491,11 @@ Milo.DefaultAdapter = Em.Object.extend({
         @method _splitUrlAndDataParams
         @private
     */
-    _splitUrlAndDataParams: function (modelClass, data) {
-        var uriTemplate = modelClass.create().get('uriTemplate');
+    _splitUrlAndDataParams: function (modelClass, data, uriTemplate) {
+        if ('undefined' === typeof uriTemplate) {
+            uriTemplate = modelClass.create().get('uriTemplate');
+        }
+
         if (!uriTemplate) {
             throw 'Mandatory parameter uriTemplate not set in model "' + modelClass.toString() + '"';
         }
@@ -777,7 +787,7 @@ Milo.Queryable = Em.Mixin.create({
             Hollywood.Actor.findOne();
     */
     findOne: function () {
-        return this._materialize(this.constructor, Milo.Proxy, function (deserialized) {
+        return this._materialize(Milo.Proxy, function (deserialized) {
             return Em.isArray(deserialized) ? deserialized[0] : deserialized;
         });
     },
@@ -791,7 +801,7 @@ Milo.Queryable = Em.Mixin.create({
             Hollywood.Actor.find().toArray();
     */
     findMany: function () {
-        return this._materialize(this.constructor, Milo.ArrayProxy, function (deserialized) {
+        return this._materialize(Milo.ArrayProxy, function (deserialized) {
             return Em.isArray(deserialized) ? deserialized : Em.A([deserialized]);
         });
     },
@@ -828,27 +838,29 @@ Milo.Queryable = Em.Mixin.create({
     @method _materialize
     @private
     */
-    _materialize: function (modelClass, proxyClass, extractContentFromDeserialized) {
-        var params = this._extractParameters(),
+    _materialize: function (proxyClass, extractContentFromDeserialized) {
+        var modelClass = this.constructor,
+            params = this._extractParameters(),
             proxy = proxyClass.create({
                 isLoading: true,
                 errors: null,
                 deferred: $.Deferred()
-            }), apiFromModelClass = this._getModelClass();
+            }), 
+            apiFromModelClass = this._getModelClass();
 
-        apiFromModelClass.adapter().query(modelClass, params)
+        apiFromModelClass.adapter().query(modelClass, params, this)
             .always(function () {
-            proxy.set('isLoading', false);
-        })
+                proxy.set('isLoading', false);
+            })
             .fail(function (errors) {
-            proxy.set('errors', errors);
-            proxy.set('isError', true);
-            proxy.get('deferred').reject(errors);
-        })
+                proxy.set('errors', errors);
+                proxy.set('isError', true);
+                proxy.get('deferred').reject(errors);
+            })
             .done(function (deserialized) {
-            proxy.set('content', extractContentFromDeserialized(deserialized));
-            proxy.get('deferred').resolve(proxy);
-        });
+                proxy.set('content', extractContentFromDeserialized(deserialized));
+                proxy.get('deferred').resolve(proxy);
+            });
 
         return proxy;
     }

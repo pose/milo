@@ -35,14 +35,18 @@ Milo.collection = function (type, options) {
         return Ember.computed(function (key, value, oldValue) {
             var parentName = this.constructor.toString(),
                 param = '%@Id'.fmt(parentName.substring(parentName.indexOf('.') + 1, parentName.length)).camelize(),
-                findParams = JSON.parse(JSON.stringify(this.get('anyClause') || {}));
-
-            type = (typeof(type) === 'string') ? Em.get(type) : type;
+                findParams = JSON.parse(JSON.stringify(this.get('anyClause') || {})),
+                queryable, uriTemplate;
 
             findParams[param] = findParams.id || this.get('id');
             delete findParams.id;
 
-            return type.where(findParams);
+            type = (typeof(type) === 'string') ? Em.get(type) : type;
+            queryable = type.create();
+            uriTemplate = queryable.get('uriTemplate');
+            queryable.set('uriTemplate', this.get('uriTemplate').replace(':id', ':' + param) + uriTemplate);
+
+            return queryable.where(findParams);
         }).property().volatile().meta(options);
     }
 };

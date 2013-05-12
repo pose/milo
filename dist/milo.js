@@ -167,7 +167,7 @@ Milo.collection = function (type, options) {
             findParams[param] = findParams.id || this.get('id');
             delete findParams.id;
 
-            return type.find(findParams);
+            return type.where(findParams);
         }).property().volatile().meta(options);
     }
 };
@@ -668,6 +668,11 @@ Some details about milo-adapters
     @extends {Ember.Mixin}
 */
 Milo.Queryable = Em.Mixin.create({
+
+    init: function () {
+        this.set('anyClause', {});
+    },
+
     /**
         Adds 'asc' param to the request url
         @method orderBy
@@ -757,7 +762,7 @@ Milo.Queryable = Em.Mixin.create({
         @example
             Hollywood.Actor.find().toArray();
     */
-    find: function (clause) {
+    where: function (clause) {
         this.set('anyClause', $.extend({}, this.get('anyClause'), clause));
 
         return this;
@@ -769,9 +774,9 @@ Milo.Queryable = Em.Mixin.create({
         @method single
         @return {Milo.Queryable}
         @example
-            Hollywood.Actor.find().single();
+            Hollywood.Actor.findOne();
     */
-    single: function () {
+    findOne: function () {
         return this._materialize(this.constructor, Milo.Proxy, function (deserialized) {
             return Em.isArray(deserialized) ? deserialized[0] : deserialized;
         });
@@ -785,7 +790,7 @@ Milo.Queryable = Em.Mixin.create({
         @example
             Hollywood.Actor.find().toArray();
     */
-    toArray: function () {
+    findMany: function () {
         return this._materialize(this.constructor, Milo.ArrayProxy, function (deserialized) {
             return Em.isArray(deserialized) ? deserialized : Em.A([deserialized]);
         });
@@ -905,8 +910,16 @@ Milo.Model.reopenClass({
         @method find
         @static
     */
-    find: function (clause) {
-        return this.create().find(clause);
+    where: function (clause) {
+        return this.create().where(clause);
+    },
+
+    findOne: function () {
+        return this.create().findOne();
+    },
+
+    findMany: function () {
+        return this.create().findMany();
     }
 });
 /**

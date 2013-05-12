@@ -42,7 +42,7 @@ Milo.collection = function (type, options) {
             findParams[param] = findParams.id || this.get('id');
             delete findParams.id;
 
-            return type.find(findParams);
+            return type.where(findParams);
         }).property().volatile().meta(options);
     }
 };

@@ -27,13 +27,13 @@ describe('Find', function () {
         server.restore();
     });
 
-    it('should fail if it does not contain properties', function () {
+    it('should fail if the uriTemplate is not set', function () {
         // Act
         window.API.Foo = Milo.Model.extend({});
 
         // Assert
         (function () {
-            window.API.Foo.find({ 'id': 42 }).single();
+            window.API.Foo.where({ 'id': 42 }).findOne();
         }).should.Throw(/uriTemplate not set in model/i);
     });
 
@@ -52,7 +52,7 @@ describe('Find', function () {
         });
         
         // Act 
-        var foo = API.Foo.find({'id':42}).single();
+        var foo = API.Foo.where({'id':42}).findOne();
 
         // Assert
         foo.should.should.be.ok;
@@ -100,10 +100,9 @@ describe('Find', function () {
         });
 
         // Act
-        var author = API.Book.find({id: 42})
+        var author = API.Book.where({id: 42})
             .get('authors')
-            .find()
-            .single()
+            .findOne()
             .done(function (data) {
                 // Assert
                 author.should.be.equal(data);
@@ -126,7 +125,7 @@ describe('Find', function () {
     });
 
 
-    it('single must pick the first element of the array if query returns more than one element', function (done) {
+    it('findOne must pick the first element of the array if query returns more than one element', function (done) {
         // Arrange
         API.Author = Milo.Model.extend({
             uriTemplate: '/book/:bookId/authors',
@@ -149,10 +148,9 @@ describe('Find', function () {
         });
 
         // Act
-        var author = API.Book.find({id: 42})
+        var author = API.Book.where({id: 42})
             .get('authors')
-            .find()
-            .single()
+            .findOne()
             .done(function (data) {
                 // Assert
                 author.should.be.equal(data);
@@ -174,7 +172,7 @@ describe('Find', function () {
                 JSON.stringify({authors: [{id: 23, name: 'Joseph Heller'}, {id: 24, name: 'Julio Cortázar'}]}));
     });
 
-    it('should work and return collection if using to array', function (done) {
+    it('should work and return collection if using findMany', function (done) {
         // Arrange
         API.Author = Milo.Model.extend({
             uriTemplate: '/book/:bookId/authors',
@@ -191,10 +189,9 @@ describe('Find', function () {
         });
 
         // Act
-        var author = API.Book.find({id: 42})
+        var author = API.Book.where({id: 42})
             .get('authors')
-            .find()
-            .toArray()
+            .findMany()
             .done(function (data) {
                 // Assert
                 author.should.be.equal(data);
@@ -235,7 +232,7 @@ describe('Find', function () {
         API.options('auth', { api_key: 'XXX' });
         
         // Act 
-        var foo = API.Foo.find({'id':42}).single();
+        var foo = API.Foo.where({'id':42}).findOne();
 
         // Assert
         foo.should.should.be.ok;
@@ -251,7 +248,7 @@ describe('Find', function () {
         
     });
 
-    it('must add content type (when set) to the requests', function (done) {
+    it('should add content type (when set) to the requests', function (done) {
         // Arrange
         API.Foo = Milo.Model.extend({
             uriTemplate: '/foo/:id',
@@ -261,7 +258,7 @@ describe('Find', function () {
         API.headers('Content-Type', 'application/cool');
         
         // Act 
-        var foo = API.Foo.find({'id':42}).single();
+        var foo = API.Foo.where({'id':42}).findOne();
 
         // Assert
         foo.should.should.be.ok;

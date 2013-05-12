@@ -54,7 +54,15 @@ Milo.Model.reopenClass({
         @method find
         @static
     */
-    find: function (clause) {
-        return this.create().find(clause);
+    where: function (clause) {
+        return this.create().where(clause);
+    },
+
+    findOne: function () {
+        return this.create().findOne();
+    },
+
+    findMany: function () {
+        return this.create().findMany();
     }
 });

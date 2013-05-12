@@ -22,7 +22,7 @@ describe('Core', function () {
             });
 
             (function () {
-                API2.Dog.find().single();
+                API2.Dog.findOne();
             }).should.Throw(/Milo.API instance not registered as a global/i);
         });
 

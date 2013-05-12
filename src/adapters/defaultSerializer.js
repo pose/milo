@@ -1,33 +1,3 @@
-var _defaultSerializer = {
-        serialize: function (value) {
-            return value;
-        },
-
-        deserialize: function (value) {
-            return value;
-        }
-    },
-    _booleanSerializer = {
-        serialize: function (value) {
-            return value ? true : false;
-        },
-
-        deserialize: function (value) {
-            return value ? true : false;
-        }
-    },
-    _numberSerializer = {
-        serialize: function (value) {
-            var numeric = parseFloat(value);
-            return isNaN(numeric) ? 0 : numeric;
-        },
-
-        deserialize: function (value) {
-            var numeric = parseFloat(value);
-            return isNaN(numeric) ? 0 : numeric;
-        }
-    };
-
 /**
     @namespace Milo
     @module milo-adapters
@@ -40,11 +10,11 @@ Milo.DefaultSerializer = Em.Object.extend({
     init: function () {
         var cache = Em.Map.create();
 
-        cache.set('string', _defaultSerializer);
-        cache.set('object', _defaultSerializer);
-        cache.set('boolean', _booleanSerializer);
-        cache.set('array', _defaultSerializer);
-        cache.set('number', _numberSerializer);
+        cache.set('string', Milo.Helpers.defaultSerializer);
+        cache.set('object', Milo.Helpers.defaultSerializer);
+        cache.set('boolean', Milo.Helpers.booleanSerializer);
+        cache.set('array', Milo.Helpers.defaultSerializer);
+        cache.set('number', Milo.Helpers.numberSerializer);
 
         this.set('serializerCache', cache);
     },

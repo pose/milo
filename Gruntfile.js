@@ -4,6 +4,7 @@ module.exports = function (grunt) {
 
     dirs: {
       src: ['src/namespace.js',
+        'src/helpers.js',
         'src/core/options.js',
         'src/dsl/uriTemplates.js',
         'src/dsl/property.js',
@@ -13,7 +14,7 @@ module.exports = function (grunt) {
         'src/adapters/defaultAdapter.js',
         'src/adapters/defaultSerializer.js',
         'src/core/queryable.js',
-        'src/model.js',
+        'src/dsl/model.js',
         'src/core/api.js']
     },
 

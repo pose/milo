@@ -1,9 +1,3 @@
-var _apiFromModelClass = function (modelClass) {
-        var modelClassName = modelClass.toString();
-
-        return Em.get(modelClassName.substring(0, modelClassName.indexOf('.')));
-    };
-
 /**
     @namespace Milo
     @module milo-adapters
@@ -17,7 +11,7 @@ Milo.DefaultAdapter = Em.Object.extend({
         @param {Array} params
     */
     query: function (modelClass, params) {
-        var api = _apiFromModelClass(modelClass),
+        var api = Milo.Helpers.apiFromModelClass(modelClass),
             urlAndQueryParams = this._splitUrlAndDataParams(modelClass, params),
             resourceUrl = this._buildResourceUrl(modelClass, urlAndQueryParams.urlParams),
             url = api.options('baseUrl') + resourceUrl,
@@ -57,7 +51,7 @@ Milo.DefaultAdapter = Em.Object.extend({
         @param {Array} params
     */
     save: function (modelClass, model) {
-        var api = _apiFromModelClass(modelClass),
+        var api = Milo.Helpers.apiFromModelClass(modelClass),
             urlAndQueryParams = this._splitUrlAndDataParams(modelClass, model.get('meta')),
             resourceUrl = this._buildResourceUrl(modelClass, urlAndQueryParams.urlParams),
             url = api.options('baseUrl') + resourceUrl,
@@ -94,7 +88,7 @@ Milo.DefaultAdapter = Em.Object.extend({
         @param {Array} params
     */
     remove: function (modelClass, model) {
-        var api = _apiFromModelClass(modelClass),
+        var api = Milo.Helpers.apiFromModelClass(modelClass),
             urlAndQueryParams = this._splitUrlAndDataParams(modelClass, model.get('meta')),
             resourceUrl = this._buildResourceUrl(modelClass, urlAndQueryParams.urlParams),
             url = api.options('baseUrl') + resourceUrl,
@@ -128,7 +122,7 @@ Milo.DefaultAdapter = Em.Object.extend({
         @private
     */
     _serialize: function (modelClass, model, method) {
-        var api = _apiFromModelClass(modelClass),
+        var api = Milo.Helpers.apiFromModelClass(modelClass),
             serializer = api.serializer().serializerFor(modelClass);
 
         return serializer.serialize(model, method);
@@ -139,7 +133,7 @@ Milo.DefaultAdapter = Em.Object.extend({
         @private
     */
     _deserialize: function (modelClass, json) {
-        var api = _apiFromModelClass(modelClass),
+        var api = Milo.Helpers.apiFromModelClass(modelClass),
             serializer = api.serializer().serializerFor(modelClass);
 
         return serializer.deserialize(json);

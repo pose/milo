@@ -7,14 +7,15 @@ window.Milo = Em.Namespace.create({
     revision: 1
 });
 
-var _apiFromModelClass = function (modelClass) {
-    var modelClassName = modelClass.toString();
 
+Milo.Helpers = {};
+
+Milo.Helpers.apiFromModelClass = function (modelClass) {
+    var modelClassName = modelClass.toString();
     return Em.get(modelClassName.substring(0, modelClassName.indexOf('.')));
 };
 
-
-var _computedPropery = Ember.computed(function (key, value, oldValue) {
+Milo.Helpers.computedPropery = Ember.computed(function (key, value, oldValue) {
     var temp = this.get('data').findProperty('key', key);
 
     if (!temp) {
@@ -34,6 +35,94 @@ var _computedPropery = Ember.computed(function (key, value, oldValue) {
     return temp.value;
 });
 
+Milo.Helpers.validateNumber = function (count) {
+    if (typeof count !== 'number' || count < 0) {
+        throw 'Invalid index "' + count + '"';
+    }
+};
+
+Milo.Helpers.validateString = function (fieldName) {
+    if (typeof fieldName !== 'string' || fieldName === '') {
+        throw 'Ordering field must be a valid string';
+    }
+};
+
+Milo.Helpers.baseUrlValidation = function (value) {
+    var validScheme = ['http://', 'https://'].map(function (e) {
+            if (value) {
+                return value.indexOf(e) === 0;
+            }
+            return false;
+        }).reduce(function (x,y) {
+            return x || y;
+        }, false);
+
+    if (value && typeof value === 'string' && validScheme) {
+        return value;
+    }
+
+    throw 'Protocol "' + value + '" not supported.';
+};
+
+Milo.Helpers.mapProperty = function (property, key, value) {
+    if ('undefined' === typeof key) {
+        return this.get(property);
+    } else if ('undefined' === typeof value && 'string' === typeof key) {
+        return this.get(property)[key];
+    } else if ('undefined' === typeof value && 'object' === typeof key) {
+        if (key.baseUrl) {
+            Milo.Helpers.baseUrlValidation(key.baseUrl);
+        }
+        this.set(property, $.extend({}, this.get(property), key));
+    } else {
+        if ('baseUrl' === key) {
+            Milo.Helpers.baseUrlValidation(value);
+        }
+        this.get(property)[key] = value;
+        return value;
+    }
+};
+
+Milo.Helpers.propertyWrapper = function (property, value) {
+    if ('undefined' === typeof value) {
+        return this.get(property);
+    } else {
+      this.set(property, value);
+      return value;
+    }
+};
+
+Milo.Helpers.defaultSerializer = {
+    serialize: function (value) {
+        return value;
+    },
+
+    deserialize: function (value) {
+        return value;
+    }
+};
+
+Milo.Helpers.booleanSerializer = {
+    serialize: function (value) {
+        return value ? true : false;
+    },
+
+    deserialize: function (value) {
+        return value ? true : false;
+    }
+};
+    
+Milo.Helpers.numberSerializer = {
+    serialize: function (value) {
+        var numeric = parseFloat(value);
+        return isNaN(numeric) ? 0 : numeric;
+    },
+
+    deserialize: function (value) {
+        var numeric = parseFloat(value);
+        return isNaN(numeric) ? 0 : numeric;
+    }
+};
 /**
     @namespace Milo
     @module milo-dsl
@@ -48,7 +137,7 @@ Milo.property = function (type, options) {
     options.operations = (options.operations === undefined) ? ['put', 'post'] : options.operations;
     options.validationRules = (options.validationRules === undefined) ? {} : options.validationRules;
 
-    return _computedPropery.property().meta(options);
+    return Milo.Helpers.computedPropery.property().meta(options);
 };
 
 /**
@@ -66,7 +155,7 @@ Milo.collection = function (type, options) {
     options.validationRules = (options.validationRules === undefined) ? {} : options.validationRules;
 
     if (options.embedded) {
-        return _computedPropery.property().meta(options);
+        return Milo.Helpers.computedPropery.property().meta(options);
     } else {
         return Ember.computed(function (key, value, oldValue) {
             var parentName = this.constructor.toString(),
@@ -225,12 +314,6 @@ Milo.ArrayProxy = Em.ArrayProxy.extend(Milo.Deferred, {
     */
     errors: null
 });
-var _apiFromModelClass = function (modelClass) {
-        var modelClassName = modelClass.toString();
-
-        return Em.get(modelClassName.substring(0, modelClassName.indexOf('.')));
-    };
-
 /**
     @namespace Milo
     @module milo-adapters
@@ -244,7 +327,7 @@ Milo.DefaultAdapter = Em.Object.extend({
         @param {Array} params
     */
     query: function (modelClass, params) {
-        var api = _apiFromModelClass(modelClass),
+        var api = Milo.Helpers.apiFromModelClass(modelClass),
             urlAndQueryParams = this._splitUrlAndDataParams(modelClass, params),
             resourceUrl = this._buildResourceUrl(modelClass, urlAndQueryParams.urlParams),
             url = api.options('baseUrl') + resourceUrl,
@@ -284,7 +367,7 @@ Milo.DefaultAdapter = Em.Object.extend({
         @param {Array} params
     */
     save: function (modelClass, model) {
-        var api = _apiFromModelClass(modelClass),
+        var api = Milo.Helpers.apiFromModelClass(modelClass),
             urlAndQueryParams = this._splitUrlAndDataParams(modelClass, model.get('meta')),
             resourceUrl = this._buildResourceUrl(modelClass, urlAndQueryParams.urlParams),
             url = api.options('baseUrl') + resourceUrl,
@@ -321,7 +404,7 @@ Milo.DefaultAdapter = Em.Object.extend({
         @param {Array} params
     */
     remove: function (modelClass, model) {
-        var api = _apiFromModelClass(modelClass),
+        var api = Milo.Helpers.apiFromModelClass(modelClass),
             urlAndQueryParams = this._splitUrlAndDataParams(modelClass, model.get('meta')),
             resourceUrl = this._buildResourceUrl(modelClass, urlAndQueryParams.urlParams),
             url = api.options('baseUrl') + resourceUrl,
@@ -355,7 +438,7 @@ Milo.DefaultAdapter = Em.Object.extend({
         @private
     */
     _serialize: function (modelClass, model, method) {
-        var api = _apiFromModelClass(modelClass),
+        var api = Milo.Helpers.apiFromModelClass(modelClass),
             serializer = api.serializer().serializerFor(modelClass);
 
         return serializer.serialize(model, method);
@@ -366,7 +449,7 @@ Milo.DefaultAdapter = Em.Object.extend({
         @private
     */
     _deserialize: function (modelClass, json) {
-        var api = _apiFromModelClass(modelClass),
+        var api = Milo.Helpers.apiFromModelClass(modelClass),
             serializer = api.serializer().serializerFor(modelClass);
 
         return serializer.deserialize(json);
@@ -456,36 +539,6 @@ Milo.DefaultAdapter = Em.Object.extend({
     }
 });
 
-var _defaultSerializer = {
-        serialize: function (value) {
-            return value;
-        },
-
-        deserialize: function (value) {
-            return value;
-        }
-    },
-    _booleanSerializer = {
-        serialize: function (value) {
-            return value ? true : false;
-        },
-
-        deserialize: function (value) {
-            return value ? true : false;
-        }
-    },
-    _numberSerializer = {
-        serialize: function (value) {
-            var numeric = parseFloat(value);
-            return isNaN(numeric) ? 0 : numeric;
-        },
-
-        deserialize: function (value) {
-            var numeric = parseFloat(value);
-            return isNaN(numeric) ? 0 : numeric;
-        }
-    };
-
 /**
     @namespace Milo
     @module milo-adapters
@@ -498,11 +551,11 @@ Milo.DefaultSerializer = Em.Object.extend({
     init: function () {
         var cache = Em.Map.create();
 
-        cache.set('string', _defaultSerializer);
-        cache.set('object', _defaultSerializer);
-        cache.set('boolean', _booleanSerializer);
-        cache.set('array', _defaultSerializer);
-        cache.set('number', _numberSerializer);
+        cache.set('string', Milo.Helpers.defaultSerializer);
+        cache.set('object', Milo.Helpers.defaultSerializer);
+        cache.set('boolean', Milo.Helpers.booleanSerializer);
+        cache.set('array', Milo.Helpers.defaultSerializer);
+        cache.set('number', Milo.Helpers.numberSerializer);
 
         this.set('serializerCache', cache);
     },
@@ -606,19 +659,6 @@ Some details about milo-adapters
 @module milo-core
 */
 
-var _validateNumber = function (count) {
-    if (typeof count !== 'number' || count < 0) {
-        throw 'Invalid index "' + count + '"';
-    }
-};
-
-var _validateString = function (fieldName) {
-    if (typeof fieldName !== 'string' || fieldName === '') {
-        throw 'Ordering field must be a valid string';
-    }
-};
-
-
 /**
     Some details about Milo.Queryable
 
@@ -638,7 +678,7 @@ Milo.Queryable = Em.Mixin.create({
             Hollywood.Actor.orderBy('name').toArray();
     */
     orderBy: function (field) {
-        _validateString(field);
+        Milo.Helpers.validateString(field);
         this.set('orderByClause', {
             orderBy: field,
             order: 'asc'
@@ -658,7 +698,7 @@ Milo.Queryable = Em.Mixin.create({
             Hollywood.Actor.orderByDescending('name').toArray();
     */
     orderByDescending: function (field) {
-        _validateString(field);
+        Milo.Helpers.validateString(field);
         this.set('orderByClause', {
             orderBy: field,
             order: 'desc'
@@ -678,7 +718,7 @@ Milo.Queryable = Em.Mixin.create({
             Hollywood.Actor.take(3).toArray();
     */
     take: function (count) {
-        _validateNumber(count);
+        Milo.Helpers.validateNumber(count);
         this.set('takeClause', {
             limit: count
         });
@@ -697,7 +737,7 @@ Milo.Queryable = Em.Mixin.create({
             Hollywood.Actor.skip(3).toArray();
     */
     skip: function (count) {
-        _validateNumber(count);
+        Milo.Helpers.validateNumber(count);
         this.set('skipClause', {
             offset: count
         });
@@ -819,10 +859,6 @@ Milo.Queryable = Em.Mixin.create({
 Milo.Model = Em.Object.extend(Milo.Queryable, {
     meta: Milo.property('object'),
 
-    _getAPI: function () {
-        return _apiFromModelClass(this.constructor);
-    },
-
     /**
         @method data
     */
@@ -849,14 +885,18 @@ Milo.Model = Em.Object.extend(Milo.Queryable, {
         @method save
     */
     save: function () {
-        _apiFromModelClass(this).options('defaultAdapter').save(this.constructor, this);
+        Milo.Helpers.apiFromModelClass(this).options('defaultAdapter').save(this.constructor, this);
     },
 
     /**
         @method remove
     */
     remove: function () {
-        _apiFromModelClass(this).get('defaultAdapter').remove(this.constructor, this);
+        Milo.Helpers.apiFromModelClass(this).get('defaultAdapter').remove(this.constructor, this);
+    },
+
+    _getAPI: function () {
+        return Milo.Helpers.apiFromModelClass(this.constructor);
     }
 });
 
@@ -869,51 +909,6 @@ Milo.Model.reopenClass({
         return this.create().find(clause);
     }
 });
-
-var _mapProperty = function (property, key, value) {
-        if ('undefined' === typeof key) {
-            return this.get(property);
-        } else if ('undefined' === typeof value && 'string' === typeof key) {
-            return this.get(property)[key];
-        } else if ('undefined' === typeof value && 'object' === typeof key) {
-            if (key.baseUrl) {
-                _baseUrlValidation(key.baseUrl);
-            }
-            this.set(property, $.extend({}, this.get(property), key));
-        } else {
-            if ('baseUrl' === key) {
-                _baseUrlValidation(value);
-            }
-            this.get(property)[key] = value;
-            return value;
-        }
-    },
-    _propertyWrapper = function (property, value) {
-        if ('undefined' === typeof value) {
-            return this.get(property);
-        } else {
-          this.set(property, value);
-          return value;
-        }
-    },
-    _baseUrlValidation = function (value) {
-        var validScheme = ['http://', 'https://'].map(function (e) {
-                if (value) {
-                    return value.indexOf(e) === 0;
-                }
-                return false;
-            }).reduce(function (x,y) {
-                return x || y;
-            }, false);
-
-        if (value && typeof value === 'string' && validScheme) {
-            _baseUrl = value;
-            return value;
-        }
-
-        throw 'Protocol "' + value + '" not supported.';
-    };
-
 /**
     @namespace Milo
     @module milo-core
@@ -942,7 +937,7 @@ Milo.API = Em.Namespace.extend({
         @param {String} value
     */
     options: function (key, value) {
-        return _mapProperty.bind(this)('_options', key, value);
+        return Milo.Helpers.mapProperty.bind(this)('_options', key, value);
     },
 
     /**
@@ -951,7 +946,7 @@ Milo.API = Em.Namespace.extend({
         @param {String} value
     */
     headers: function (key, value) {
-        return _mapProperty.bind(this)('_headers', key, value);
+        return Milo.Helpers.mapProperty.bind(this)('_headers', key, value);
     },
 
     /**
@@ -960,7 +955,7 @@ Milo.API = Em.Namespace.extend({
         @param {String} value
     */
     queryParams: function (key, value) {
-        return _mapProperty.bind(this)('_queryParams', key, value);
+        return Milo.Helpers.mapProperty.bind(this)('_queryParams', key, value);
     },
 
     /**
@@ -968,7 +963,7 @@ Milo.API = Em.Namespace.extend({
         @param {String} value
     */
     adapter: function (value) {
-        return _propertyWrapper.bind(this)('_adapter', value);
+        return Milo.Helpers.propertyWrapper.bind(this)('_adapter', value);
     },
 
     /**
@@ -976,6 +971,6 @@ Milo.API = Em.Namespace.extend({
         @param {String} value
     */
     serializer: function (value) {
-        return _propertyWrapper.bind(this)('_serializer', value);
+        return Milo.Helpers.propertyWrapper.bind(this)('_serializer', value);
     }
 });

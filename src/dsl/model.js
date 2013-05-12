@@ -8,10 +8,6 @@
 Milo.Model = Em.Object.extend(Milo.Queryable, {
     meta: Milo.property('object'),
 
-    _getAPI: function () {
-        return _apiFromModelClass(this.constructor);
-    },
-
     /**
         @method data
     */
@@ -38,14 +34,18 @@ Milo.Model = Em.Object.extend(Milo.Queryable, {
         @method save
     */
     save: function () {
-        _apiFromModelClass(this).options('defaultAdapter').save(this.constructor, this);
+        Milo.Helpers.apiFromModelClass(this).options('defaultAdapter').save(this.constructor, this);
     },
 
     /**
         @method remove
     */
     remove: function () {
-        _apiFromModelClass(this).get('defaultAdapter').remove(this.constructor, this);
+        Milo.Helpers.apiFromModelClass(this).get('defaultAdapter').remove(this.constructor, this);
+    },
+
+    _getAPI: function () {
+        return Milo.Helpers.apiFromModelClass(this.constructor);
     }
 });
 

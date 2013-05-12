@@ -1,47 +1,3 @@
-var _mapProperty = function (property, key, value) {
-        if ('undefined' === typeof key) {
-            return this.get(property);
-        } else if ('undefined' === typeof value && 'string' === typeof key) {
-            return this.get(property)[key];
-        } else if ('undefined' === typeof value && 'object' === typeof key) {
-            if (key.baseUrl) {
-                _baseUrlValidation(key.baseUrl);
-            }
-            this.set(property, $.extend({}, this.get(property), key));
-        } else {
-            if ('baseUrl' === key) {
-                _baseUrlValidation(value);
-            }
-            this.get(property)[key] = value;
-            return value;
-        }
-    },
-    _propertyWrapper = function (property, value) {
-        if ('undefined' === typeof value) {
-            return this.get(property);
-        } else {
-          this.set(property, value);
-          return value;
-        }
-    },
-    _baseUrlValidation = function (value) {
-        var validScheme = ['http://', 'https://'].map(function (e) {
-                if (value) {
-                    return value.indexOf(e) === 0;
-                }
-                return false;
-            }).reduce(function (x,y) {
-                return x || y;
-            }, false);
-
-        if (value && typeof value === 'string' && validScheme) {
-            _baseUrl = value;
-            return value;
-        }
-
-        throw 'Protocol "' + value + '" not supported.';
-    };
-
 /**
     @namespace Milo
     @module milo-core
@@ -70,7 +26,7 @@ Milo.API = Em.Namespace.extend({
         @param {String} value
     */
     options: function (key, value) {
-        return _mapProperty.bind(this)('_options', key, value);
+        return Milo.Helpers.mapProperty.bind(this)('_options', key, value);
     },
 
     /**
@@ -79,7 +35,7 @@ Milo.API = Em.Namespace.extend({
         @param {String} value
     */
     headers: function (key, value) {
-        return _mapProperty.bind(this)('_headers', key, value);
+        return Milo.Helpers.mapProperty.bind(this)('_headers', key, value);
     },
 
     /**
@@ -88,7 +44,7 @@ Milo.API = Em.Namespace.extend({
         @param {String} value
     */
     queryParams: function (key, value) {
-        return _mapProperty.bind(this)('_queryParams', key, value);
+        return Milo.Helpers.mapProperty.bind(this)('_queryParams', key, value);
     },
 
     /**
@@ -96,7 +52,7 @@ Milo.API = Em.Namespace.extend({
         @param {String} value
     */
     adapter: function (value) {
-        return _propertyWrapper.bind(this)('_adapter', value);
+        return Milo.Helpers.propertyWrapper.bind(this)('_adapter', value);
     },
 
     /**
@@ -104,6 +60,6 @@ Milo.API = Em.Namespace.extend({
         @param {String} value
     */
     serializer: function (value) {
-        return _propertyWrapper.bind(this)('_serializer', value);
+        return Milo.Helpers.propertyWrapper.bind(this)('_serializer', value);
     }
 });

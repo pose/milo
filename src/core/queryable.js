@@ -4,19 +4,6 @@ Some details about milo-adapters
 @module milo-core
 */
 
-var _validateNumber = function (count) {
-    if (typeof count !== 'number' || count < 0) {
-        throw 'Invalid index "' + count + '"';
-    }
-};
-
-var _validateString = function (fieldName) {
-    if (typeof fieldName !== 'string' || fieldName === '') {
-        throw 'Ordering field must be a valid string';
-    }
-};
-
-
 /**
     Some details about Milo.Queryable
 
@@ -36,7 +23,7 @@ Milo.Queryable = Em.Mixin.create({
             Hollywood.Actor.orderBy('name').toArray();
     */
     orderBy: function (field) {
-        _validateString(field);
+        Milo.Helpers.validateString(field);
         this.set('orderByClause', {
             orderBy: field,
             order: 'asc'
@@ -56,7 +43,7 @@ Milo.Queryable = Em.Mixin.create({
             Hollywood.Actor.orderByDescending('name').toArray();
     */
     orderByDescending: function (field) {
-        _validateString(field);
+        Milo.Helpers.validateString(field);
         this.set('orderByClause', {
             orderBy: field,
             order: 'desc'
@@ -76,7 +63,7 @@ Milo.Queryable = Em.Mixin.create({
             Hollywood.Actor.take(3).toArray();
     */
     take: function (count) {
-        _validateNumber(count);
+        Milo.Helpers.validateNumber(count);
         this.set('takeClause', {
             limit: count
         });
@@ -95,7 +82,7 @@ Milo.Queryable = Em.Mixin.create({
             Hollywood.Actor.skip(3).toArray();
     */
     skip: function (count) {
-        _validateNumber(count);
+        Milo.Helpers.validateNumber(count);
         this.set('skipClause', {
             offset: count
         });

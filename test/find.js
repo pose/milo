@@ -24,6 +24,7 @@ describe('Query operations', function () {
     });
 
     it('should work with inheritance', function (done) {
+        // Act
         API.Entity = Milo.Model.extend({
             id: Milo.property('number')
         });
@@ -36,6 +37,7 @@ describe('Query operations', function () {
 
         var dog = API.Dog.where({id: 1}).findOne();
 
+        // Assert
         dog.should.be.ok;
         dog.should.have.property('isLoading', true);
         dog.should.have.property('done');

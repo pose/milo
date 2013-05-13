@@ -378,7 +378,6 @@ Milo.DefaultAdapter = Em.Object.extend({
                 deferred.resolve(deserialized);
             })
             .fail(function () {
-                console.log('failed');
                 deferred.reject(arguments);
             });
 
@@ -405,18 +404,15 @@ Milo.DefaultAdapter = Em.Object.extend({
 
         this._ajax(api, method, url + '?' + queryParams, serialized)
             .done(function (data) {
-                console.log('saved');
                 model.set('isDirty', false);
                 model.set('isNew', false);
+                model.set('isSaving', false);
                 deferred.resolve(model);
             })
             .fail(function () {
-                console.log('failed');
                 model.set('errors', arguments);
-                deferred.reject(arguments);
-            })
-            .always(function () {
                 model.set('isSaving', false);
+                deferred.reject(arguments);
             });
 
         return deferred.promise();
@@ -440,13 +436,11 @@ Milo.DefaultAdapter = Em.Object.extend({
 
         this._ajax(api, method, url + '?' + queryParams)
             .done(function (data) {
-                console.log('saved');
                 model.set('isDirty', false);
                 model.set('isDeleted', true);
                 deferred.resolve(model);
             })
             .fail(function () {
-                console.log('failed');
                 model.set('errors', arguments);
                 deferred.reject(arguments);
             })
@@ -516,14 +510,14 @@ Milo.DefaultAdapter = Em.Object.extend({
         }
 
         if (!uriTemplate) {
-            throw 'Mandatory parameter uriTemplate not set in model "' + modelClass.toString() + '"';
+            throw 'Mandatory parameter uriTemplate not set in model "%@"'.fmt(modelClass.toString());
         }
 
         var urlTerms = uriTemplate.split('/'),
             modelClassName = modelClass.toString(),
             modelIdField = modelClassName.substring(modelClassName.indexOf('.') + 1).camelize() + 'Id',
             urlParams = {},
-            dataParams = JSON.parse(JSON.stringify(data));
+            dataParams = data ? Milo.Helpers.clone(data) : {};
 
         urlTerms.forEach(function (uriTerm) {
             var fieldName = uriTerm.replace(':', '');
@@ -926,14 +920,16 @@ Milo.Model = Em.Object.extend(Milo.Queryable, {
         @method save
     */
     save: function () {
-        Milo.Helpers.apiFromModelClass(this).options('defaultAdapter').save(this.constructor, this);
+        return Milo.Helpers.apiFromModelClass(this.constructor).adapter()
+            .save(this.constructor, this);
     },
 
     /**
         @method remove
     */
     remove: function () {
-        Milo.Helpers.apiFromModelClass(this).get('defaultAdapter').remove(this.constructor, this);
+        return Milo.Helpers.apiFromModelClass(this.constructor).adapter()
+            .remove(this.constructor, this);
     },
 
     _getAPI: function () {
@@ -958,6 +954,7 @@ Milo.Model.reopenClass({
         return this.create().findMany();
     }
 });
+
 /**
     @namespace Milo
     @module milo-core

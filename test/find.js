@@ -3,6 +3,7 @@
 // XXX Why can't we remove operations array from the model?
 // XXX .fail() does not work
 // XXX Assert that an entity can't use array if rootElement is not set
+// XXX Test of validations
 
 
 describe('Query operations', function () {
@@ -22,13 +23,48 @@ describe('Query operations', function () {
         server.restore();
     });
 
+    it('should work with inheritance', function (done) {
+        API.Entity = Milo.Model.extend({
+            id: Milo.property('number')
+        });
+
+        API.Dog = API.Entity.extend({
+            uriTemplate: '/dog/:id',
+            name: Milo.property('string'),
+            age: Milo.property('number')
+        });
+
+        var dog = API.Dog.where({id: 1}).findOne();
+
+        dog.should.be.ok;
+        dog.should.have.property('isLoading', true);
+        dog.should.have.property('done');
+        dog.should.have.property('fail');
+        dog.should.have.property('then');
+
+        dog.done(function (data) {
+            dog.should.be.equal(data);
+            dog.should.have.property('isLoading', false);
+
+            dog.get('id').should.be.equal(1);
+            dog.get('name').should.be.equal('bobby');
+            dog.get('age').should.be.equal(3);
+
+            done();
+        });
+        
+        server.requests[0].url.should.be.equal('https://myapi.com/api/dog/1?');
+        server.requests[0].respond(200, { "Content-Type": "application/json" }, 
+                JSON.stringify({id: 1, name: 'bobby', age: 3}));
+    });
+
     it('should fail if the uriTemplate is not set', function () {
         // Act
-        window.API.Foo = Milo.Model.extend({});
+        API.Foo = Milo.Model.extend({});
 
         // Assert
         (function () {
-            window.API.Foo.where({ 'id': 42 }).findOne();
+            API.Foo.where({id: 42}).findOne();
         }).should.Throw(/uriTemplate not set in model/i);
     });
 
@@ -37,17 +73,11 @@ describe('Query operations', function () {
         API.Foo = Milo.Model.extend({
             uriTemplate: '/foo/:id',
             id: Milo.property('number'),
-            name: Milo.property('string', {
-                defaultValue: '',
-                operations: ['put', 'post'],
-                validationRules: {
-                    required: true
-                }
-            })
+            name: Milo.property('string')
         });
         
         // Act 
-        var foo = API.Foo.where({'id':42}).findOne();
+        var foo = API.Foo.where({id: 42}).findOne();
 
         // Assert
         foo.should.should.be.ok;

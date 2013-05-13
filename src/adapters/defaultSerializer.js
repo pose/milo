@@ -48,9 +48,11 @@ Milo.DefaultSerializer = Em.Object.extend({
             that = this;
 
         modelClass.eachComputedProperty(function (propertyName) {
-            var propertyMetadata = modelClass.metaForProperty(propertyName);
+            // XXX Model properties cannot be named meta or _data
+            var propertyMetadata = modelClass.metaForProperty(propertyName),
+                forbiddenProperties = ['meta', '_data'];
 
-            if (propertyMetadata.type && propertyMetadata.embedded) {
+            if (!forbiddenProperties.contains(propertyName) && propertyMetadata.type && propertyMetadata.embedded) {
                 properties.push($.extend({ name: propertyName }, propertyMetadata));
             }
         });
@@ -66,7 +68,12 @@ Milo.DefaultSerializer = Em.Object.extend({
         });
 
         serializer.serialize = modelClass.serialize || function (model, method) {
-            var serialized = (method || 'post').toLower() === 'post' ?
+            if (!(model && (model.constructor === modelClass ||
+                            (model.constructor && model.constructor.toString && model.constructor.toString() === modelClass)))) {
+                throw new Error('Error serializing instance: model is not an instance of %@'.fmt(modelClass));
+            }
+
+            var serialized = (method || 'post').toLowerCase() === 'post' ?
                 model.getProperties(propertyNamesForPost) : model.getProperties(propertyNamesForPut);
 
             properties.forEach(function (property) {

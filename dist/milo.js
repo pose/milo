@@ -15,25 +15,27 @@ Milo.Helpers.apiFromModelClass = function (modelClass) {
     return Em.get(modelClassName.substring(0, modelClassName.indexOf('.')));
 };
 
-Milo.Helpers.computedPropery = Ember.computed(function (key, value, oldValue) {
-    var temp = this.get('data').findProperty('key', key);
-
-    if (!temp) {
-        temp = this.get('data').pushObject(Em.Object.create({
-            key: key,
-            value: value,
-            orig: value
-        }));
-    } else {
-        temp.value = value;
-    }
-
-    if (oldValue) {
-        this.set('isDirty', true);
-    }
-
-    return temp.value;
-});
+Milo.Helpers.computedPropery = function () {
+        return Ember.computed(function (key, value, oldValue) {
+        var temp = this.get('data').findProperty('key', key);
+    
+        if (!temp) {
+            temp = this.get('data').pushObject(Em.Object.create({
+                key: key,
+                value: value,
+                orig: value
+            }));
+        } else {
+            temp.value = value;
+        }
+    
+        if (oldValue) {
+            this.set('isDirty', true);
+        }
+    
+        return temp.value;
+    });
+};
 
 Milo.Helpers.validateNumber = function (count) {
     if (typeof count !== 'number' || count < 0) {
@@ -123,6 +125,7 @@ Milo.Helpers.numberSerializer = {
         return isNaN(numeric) ? 0 : numeric;
     }
 };
+
 /**
     @namespace Milo
     @module milo-dsl
@@ -137,7 +140,7 @@ Milo.property = function (type, options) {
     options.operations = (options.operations === undefined) ? ['put', 'post'] : options.operations;
     options.validationRules = (options.validationRules === undefined) ? {} : options.validationRules;
 
-    return Milo.Helpers.computedPropery.property().meta(options);
+    return Milo.Helpers.computedPropery().property().meta(options);
 };
 
 /**
@@ -155,11 +158,12 @@ Milo.collection = function (type, options) {
     options.validationRules = (options.validationRules === undefined) ? {} : options.validationRules;
 
     if (options.embedded) {
-        return Milo.Helpers.computedPropery.property().meta(options);
+        return Milo.Helpers.computedPropery().property().meta(options);
     } else {
         return Ember.computed(function (key, value, oldValue) {
             var parentName = this.constructor.toString(),
                 param = '%@Id'.fmt(parentName.substring(parentName.indexOf('.') + 1, parentName.length)).camelize(),
+                // TODO Create a clone helper
                 findParams = JSON.parse(JSON.stringify(this.get('anyClause') || {})),
                 queryable, uriTemplate;
 
@@ -203,8 +207,20 @@ Milo.Deferred = Em.Mixin.create({
   fail: function (callback) {
     this.get('deferred').fail(callback);
     return this;
+  },
+
+  /**
+   * Rhis method will be called always. Whether the ajax request fails or not.
+   *
+   * @method then
+   * @return {Milo.Deferred}
+   */
+  then: function (callback) {
+    this.get('deferred').then(callback);
+    return this;
   }
 });
+
 /**
     @namespace Milo
     @module milo-core
@@ -599,9 +615,11 @@ Milo.DefaultSerializer = Em.Object.extend({
             that = this;
 
         modelClass.eachComputedProperty(function (propertyName) {
-            var propertyMetadata = modelClass.metaForProperty(propertyName);
+            // XXX Model properties cannot be named meta or _data
+            var propertyMetadata = modelClass.metaForProperty(propertyName),
+                forbiddenProperties = ['meta', '_data'];
 
-            if (propertyMetadata.type && propertyMetadata.embedded) {
+            if (!forbiddenProperties.contains(propertyName) && propertyMetadata.type && propertyMetadata.embedded) {
                 properties.push($.extend({ name: propertyName }, propertyMetadata));
             }
         });
@@ -617,7 +635,12 @@ Milo.DefaultSerializer = Em.Object.extend({
         });
 
         serializer.serialize = modelClass.serialize || function (model, method) {
-            var serialized = (method || 'post').toLower() === 'post' ?
+            if (!(model && (model.constructor === modelClass ||
+                            (model.constructor && model.constructor.toString && model.constructor.toString() === modelClass)))) {
+                throw new Error('Error serializing instance: model is not an instance of %@'.fmt(modelClass));
+            }
+
+            var serialized = (method || 'post').toLowerCase() === 'post' ?
                 model.getProperties(propertyNamesForPost) : model.getProperties(propertyNamesForPut);
 
             properties.forEach(function (property) {

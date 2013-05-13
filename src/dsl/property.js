@@ -12,7 +12,7 @@ Milo.property = function (type, options) {
     options.operations = (options.operations === undefined) ? ['put', 'post'] : options.operations;
     options.validationRules = (options.validationRules === undefined) ? {} : options.validationRules;
 
-    return Milo.Helpers.computedPropery.property().meta(options);
+    return Milo.Helpers.computedPropery().property().meta(options);
 };
 
 /**
@@ -30,11 +30,12 @@ Milo.collection = function (type, options) {
     options.validationRules = (options.validationRules === undefined) ? {} : options.validationRules;
 
     if (options.embedded) {
-        return Milo.Helpers.computedPropery.property().meta(options);
+        return Milo.Helpers.computedPropery().property().meta(options);
     } else {
         return Ember.computed(function (key, value, oldValue) {
             var parentName = this.constructor.toString(),
                 param = '%@Id'.fmt(parentName.substring(parentName.indexOf('.') + 1, parentName.length)).camelize(),
+                // TODO Create a clone helper
                 findParams = JSON.parse(JSON.stringify(this.get('anyClause') || {})),
                 queryable, uriTemplate;
 

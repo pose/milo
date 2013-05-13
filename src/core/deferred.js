@@ -25,5 +25,16 @@ Milo.Deferred = Em.Mixin.create({
   fail: function (callback) {
     this.get('deferred').fail(callback);
     return this;
+  },
+
+  /**
+   * Rhis method will be called always. Whether the ajax request fails or not.
+   *
+   * @method then
+   * @return {Milo.Deferred}
+   */
+  then: function (callback) {
+    this.get('deferred').then(callback);
+    return this;
   }
 });

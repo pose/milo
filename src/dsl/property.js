@@ -35,8 +35,7 @@ Milo.collection = function (type, options) {
         return Ember.computed(function (key, value, oldValue) {
             var parentName = this.constructor.toString(),
                 param = '%@Id'.fmt(parentName.substring(parentName.indexOf('.') + 1, parentName.length)).camelize(),
-                // TODO Create a clone helper
-                findParams = JSON.parse(JSON.stringify(this.get('anyClause') || {})),
+                findParams = Milo.Helpers.clone(this.get('anyClause') || {}),
                 queryable, uriTemplate;
 
             findParams[param] = findParams.id || this.get('id');

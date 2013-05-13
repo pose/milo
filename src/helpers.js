@@ -115,3 +115,7 @@ Milo.Helpers.numberSerializer = {
         return isNaN(numeric) ? 0 : numeric;
     }
 };
+
+Milo.Helpers.clone = function(obj) {
+    return JSON.parse(JSON.stringify(obj));
+};

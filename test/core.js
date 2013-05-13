@@ -154,7 +154,7 @@ describe('Core', function () {
     });
     
 
-    describe('Options validation', function () {
+    describe('API.options validation', function () {
         var API, API2;
 
         beforeEach(function () {

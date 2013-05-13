@@ -126,6 +126,10 @@ Milo.Helpers.numberSerializer = {
     }
 };
 
+Milo.Helpers.clone = function(obj) {
+    return JSON.parse(JSON.stringify(obj));
+};
+
 /**
     @namespace Milo
     @module milo-dsl
@@ -163,8 +167,7 @@ Milo.collection = function (type, options) {
         return Ember.computed(function (key, value, oldValue) {
             var parentName = this.constructor.toString(),
                 param = '%@Id'.fmt(parentName.substring(parentName.indexOf('.') + 1, parentName.length)).camelize(),
-                // TODO Create a clone helper
-                findParams = JSON.parse(JSON.stringify(this.get('anyClause') || {})),
+                findParams = Milo.Helpers.clone(this.get('anyClause') || {}),
                 queryable, uriTemplate;
 
             findParams[param] = findParams.id || this.get('id');
@@ -548,7 +551,8 @@ Milo.DefaultAdapter = Em.Object.extend({
     */
     _ajax: function (api, method, url, data, cache) {
         var cacheFlag = (method || 'GET') === 'GET' ? cache : true,
-            contentType = api.headers('Content-Type') || 'application/json';
+            contentType = api.headers('Content-Type') || 'application/json',
+            headers = api.headers();
 
         return jQuery.ajax({
             contentType: contentType,
@@ -556,10 +560,7 @@ Milo.DefaultAdapter = Em.Object.extend({
             dataType: (method || 'GET') === 'GET' ? 'json' : 'text',
             data: data ? JSON.stringify(data) : '',
             url: url,
-            headers: {
-                // XXX Unhardcode
-                accept: 'application/vnd.mulesoft.habitat+json'
-            },
+            headers: headers,
             cache: cacheFlag
         });
     }
@@ -615,8 +616,8 @@ Milo.DefaultSerializer = Em.Object.extend({
             that = this;
 
         modelClass.eachComputedProperty(function (propertyName) {
-            // XXX Model properties cannot be named meta or _data
             var propertyMetadata = modelClass.metaForProperty(propertyName),
+                // Model properties cannot be named any of these names
                 forbiddenProperties = ['meta', '_data'];
 
             if (!forbiddenProperties.contains(propertyName) && propertyMetadata.type && propertyMetadata.embedded) {

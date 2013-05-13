@@ -1,16 +1,11 @@
-chai.should();
-var expect = chai.expect;
-
 // TODO What happens if there is no element returned in the query and I do .single?
 // TODO Test always returning a proxy with deferred
 // XXX Why can't we remove operations array from the model?
 // XXX .fail() does not work
-// XXX What happens if JSON sent does not match the schema? Ans: There is not validation
 // XXX Assert that an entity can't use array if rootElement is not set
-// First done parameter is foo
 
 
-describe('Find', function () {
+describe('Query operations', function () {
     var server;
 
     beforeEach(function () {
@@ -58,6 +53,8 @@ describe('Find', function () {
         foo.should.should.be.ok;
         foo.should.have.property('isLoading', true);
         foo.should.have.property('done');
+        foo.should.have.property('fail');
+        foo.should.have.property('then');
         foo.done(function (data) {
             foo.should.be.equal(data);
             foo.should.have.property('isLoading', false);
@@ -119,6 +116,8 @@ describe('Find', function () {
         author.should.be.ok;
         author.should.have.property('isLoading', true);
         author.should.have.property('done');
+        author.should.have.property('fail');
+        author.should.have.property('then');
 
         server.requests[0].respond(200, { "Content-Type": "application/json" }, 
                 JSON.stringify({authors: [{id: 23, name: 'Joseph Heller'}]}));
@@ -167,6 +166,8 @@ describe('Find', function () {
         author.should.be.ok;
         author.should.have.property('isLoading', true);
         author.should.have.property('done');
+        author.should.have.property('fail');
+        author.should.have.property('then');
 
         server.requests[0].respond(200, { "Content-Type": "application/json" }, 
                 JSON.stringify({authors: [{id: 23, name: 'Joseph Heller'}, {id: 24, name: 'Julio Cortázar'}]}));
@@ -211,6 +212,8 @@ describe('Find', function () {
         author.should.be.ok;
         author.should.have.property('isLoading', true);
         author.should.have.property('done');
+        author.should.have.property('fail');
+        author.should.have.property('then');
 
         server.requests[0].respond(200, { "Content-Type": "application/json" }, 
                 JSON.stringify({authors: [{id: 23, name: 'Joseph Heller'}, {id: 24, name: 'Julio Cortázar'}]}));
@@ -236,6 +239,9 @@ describe('Find', function () {
 
         // Assert
         foo.should.should.be.ok;
+        foo.should.have.property('done');
+        foo.should.have.property('fail');
+        foo.should.have.property('then');
         foo.done(function (data) {
             server.requests.length.should.be.equal(1);
             server.requests[0].url.should.be.equal("https://myapi.com/api/foo/42?api_key=XXX");
@@ -262,6 +268,9 @@ describe('Find', function () {
 
         // Assert
         foo.should.should.be.ok;
+        foo.should.have.property('done');
+        foo.should.have.property('fail');
+        foo.should.have.property('then');
         foo.done(function (data) {
             server.requests.length.should.be.equal(1);
             server.requests[0].url.should.be.equal("https://myapi.com/api/foo/42?");

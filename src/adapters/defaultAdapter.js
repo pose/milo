@@ -212,7 +212,8 @@ Milo.DefaultAdapter = Em.Object.extend({
     */
     _ajax: function (api, method, url, data, cache) {
         var cacheFlag = (method || 'GET') === 'GET' ? cache : true,
-            contentType = api.headers('Content-Type') || 'application/json';
+            contentType = api.headers('Content-Type') || 'application/json',
+            headers = api.headers();
 
         return jQuery.ajax({
             contentType: contentType,
@@ -220,10 +221,7 @@ Milo.DefaultAdapter = Em.Object.extend({
             dataType: (method || 'GET') === 'GET' ? 'json' : 'text',
             data: data ? JSON.stringify(data) : '',
             url: url,
-            headers: {
-                // XXX Unhardcode
-                accept: 'application/vnd.mulesoft.habitat+json'
-            },
+            headers: headers,
             cache: cacheFlag
         });
     }

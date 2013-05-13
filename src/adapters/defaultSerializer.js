@@ -48,8 +48,8 @@ Milo.DefaultSerializer = Em.Object.extend({
             that = this;
 
         modelClass.eachComputedProperty(function (propertyName) {
-            // XXX Model properties cannot be named meta or _data
             var propertyMetadata = modelClass.metaForProperty(propertyName),
+                // Model properties cannot be named any of these names
                 forbiddenProperties = ['meta', '_data'];
 
             if (!forbiddenProperties.contains(propertyName) && propertyMetadata.type && propertyMetadata.embedded) {

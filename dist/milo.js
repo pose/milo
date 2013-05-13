@@ -438,14 +438,13 @@ Milo.DefaultAdapter = Em.Object.extend({
             .done(function (data) {
                 model.set('isDirty', false);
                 model.set('isDeleted', true);
+                model.set('isDeleting', false);
                 deferred.resolve(model);
             })
             .fail(function () {
                 model.set('errors', arguments);
-                deferred.reject(arguments);
-            })
-            .always(function () {
                 model.set('isDeleting', false);
+                deferred.reject(arguments);
             });
 
         return deferred.promise();

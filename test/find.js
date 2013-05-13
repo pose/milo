@@ -70,7 +70,7 @@ describe('Query operations', function () {
         }).should.Throw(/uriTemplate not set in model/i);
     });
 
-    it('should make an ajax call', function (done) {
+    it('should handle basic entities', function (done) {
         // Arrange
         API.Foo = Milo.Model.extend({
             uriTemplate: '/foo/:id',
@@ -317,6 +317,40 @@ describe('Query operations', function () {
         
 
     });
+    
+    it('.fail() should be executed when the request fail', function (done) {
+        // Arrange
+        API.Foo = Milo.Model.extend({
+            uriTemplate: '/foo/:id',
+            id: Milo.property('number'),
+            name: Milo.property('string')
+        });
+        
+        // Act 
+        var foo = API.Foo.where({id: 42}).findOne();
+
+        // Assert
+        foo.should.should.be.ok;
+        foo.should.have.property('isLoading', true);
+        ['done', 'fail', 'then'].forEach(function (verb) {
+            foo.should.have.property(verb);
+        });
+
+        // TODO What is data?
+        foo.fail(function (data) {
+            foo.should.have.property('isLoading', false);
+            // XXX Can't have a property named content, throw exception if found
+            
+            server.requests.length.should.be.equal(1);
+            server.requests[0].url.should.be.equal("https://myapi.com/api/foo/42?");
+
+            
+            done();
+        });
+        
+        server.requests[0].respond(404, { "Content-Type": "application/json" }, JSON.stringify({message: 'Not found'}));
+    });
+
 });
 
 

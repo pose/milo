@@ -177,23 +177,22 @@ Milo.Queryable = Em.Mixin.create({
         var modelClass = this.constructor,
             params = this._extractParameters(),
             proxy = proxyClass.create({
-                isLoading: true,
+                isLoaded: false,
                 errors: null,
                 deferred: $.Deferred()
             }), 
             apiFromModelClass = this._getModelClass();
 
         apiFromModelClass.adapter().query(modelClass, params, this)
-            .always(function () {
-                proxy.set('isLoading', false);
-            })
             .fail(function (errors) {
                 proxy.set('errors', errors);
                 proxy.set('isError', true);
+                proxy.set('isLoaded', true);
                 proxy.get('deferred').reject(errors);
             })
             .done(function (deserialized) {
                 proxy.set('content', extractContentFromDeserialized(deserialized));
+                proxy.set('isLoaded', true);
                 proxy.get('deferred').resolve(proxy);
             });
 

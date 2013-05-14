@@ -9,11 +9,11 @@ Milo.ArrayProxy = Em.ArrayProxy.extend(Milo.Deferred, {
 	/**
         Indicates if the entity is in the 'loading' state
         
-        @attribute isLoading
+        @attribute isLoaded
         @default false
         @type boolean
     */
-    isLoading: false,
+    isLoaded: true,
 
 	/**
         Indicates if the entity has errors

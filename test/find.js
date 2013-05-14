@@ -39,14 +39,14 @@ describe('Query operations', function () {
 
         // Assert
         dog.should.be.ok;
-        dog.should.have.property('isLoading', true);
+        dog.should.have.property('isLoaded', false);
         dog.should.have.property('done');
         dog.should.have.property('fail');
         dog.should.have.property('then');
 
         dog.done(function (data) {
             dog.should.be.equal(data);
-            dog.should.have.property('isLoading', false);
+            dog.should.have.property('isLoaded', true);
 
             dog.get('id').should.be.equal(1);
             dog.get('name').should.be.equal('bobby');
@@ -83,13 +83,13 @@ describe('Query operations', function () {
 
         // Assert
         foo.should.should.be.ok;
-        foo.should.have.property('isLoading', true);
+        foo.should.have.property('isLoaded', false);
         foo.should.have.property('done');
         foo.should.have.property('fail');
         foo.should.have.property('then');
         foo.done(function (data) {
             foo.should.be.equal(data);
-            foo.should.have.property('isLoading', false);
+            foo.should.have.property('isLoaded', true);
             // XXX Can't have a property named content, throw exception if found
             foo.get('id').should.be.equal(42);
             foo.get('name').should.be.equal('Catch 22');
@@ -135,7 +135,7 @@ describe('Query operations', function () {
             .done(function (data) {
                 // Assert
                 author.should.be.equal(data);
-                author.should.have.property('isLoading', false);
+                author.should.have.property('isLoaded', true);
 
                 author.get('id').should.be.equal(23);
                 author.get('name').should.be.equal('Joseph Heller');
@@ -146,7 +146,7 @@ describe('Query operations', function () {
                 done();
             });
         author.should.be.ok;
-        author.should.have.property('isLoading', true);
+        author.should.have.property('isLoaded', false);
         author.should.have.property('done');
         author.should.have.property('fail');
         author.should.have.property('then');
@@ -185,7 +185,7 @@ describe('Query operations', function () {
             .done(function (data) {
                 // Assert
                 author.should.be.equal(data);
-                author.should.have.property('isLoading', false);
+                author.should.have.property('isLoaded', true);
 
                 author.get('id').should.be.equal(23);
                 author.get('name').should.be.equal('Joseph Heller');
@@ -196,7 +196,7 @@ describe('Query operations', function () {
                 done();
             });
         author.should.be.ok;
-        author.should.have.property('isLoading', true);
+        author.should.have.property('isLoaded', false);
         author.should.have.property('done');
         author.should.have.property('fail');
         author.should.have.property('then');
@@ -228,7 +228,7 @@ describe('Query operations', function () {
             .done(function (data) {
                 // Assert
                 author.should.be.equal(data);
-                author.should.have.property('isLoading', false);
+                author.should.have.property('isLoaded', true);
 
                 author.objectAt(0).get('id').should.be.equal(23);
                 author.objectAt(0).get('name').should.be.equal('Joseph Heller');
@@ -242,7 +242,7 @@ describe('Query operations', function () {
                 done();
             });
         author.should.be.ok;
-        author.should.have.property('isLoading', true);
+        author.should.have.property('isLoaded', false);
         author.should.have.property('done');
         author.should.have.property('fail');
         author.should.have.property('then');
@@ -331,14 +331,14 @@ describe('Query operations', function () {
 
         // Assert
         foo.should.should.be.ok;
-        foo.should.have.property('isLoading', true);
+        foo.should.have.property('isLoaded', false);
         ['done', 'fail', 'then'].forEach(function (verb) {
             foo.should.have.property(verb);
         });
 
         // TODO What is data?
         foo.fail(function (data) {
-            foo.should.have.property('isLoading', false);
+            foo.should.have.property('isLoaded', true);
             // XXX Can't have a property named content, throw exception if found
             
             server.requests.length.should.be.equal(1);

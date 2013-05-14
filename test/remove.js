@@ -20,7 +20,7 @@ describe('Remove operations', function () {
             uriTemplate: '/book/:id',
             id: Milo.property('number'),
             name: Milo.property('string'),
-            authors: Milo.collection('API.Author')
+            authors: Milo.collection('API.Author', {embedded: true})
         });
 
         // Fake server
@@ -69,7 +69,7 @@ describe('Remove operations', function () {
             authors: [API.Author.create({id: 5, name: 'Anthony Burgess'})]});
 
         // Act
-        author = book.get('authors').objectAt(0);
+        author = book.get('authors')[0];
         promise = author.remove();
 
         // Assert
@@ -84,10 +84,11 @@ describe('Remove operations', function () {
         promise.done(function (data) {
             data.should.have.property('isDeleting', false);
             
-            // TODO XXX What should happen here?
-            // server.requests[0].method.should.be.equal('DELETE');
-            // server.requests[0].url.should.be.equal('https://fake/dog/9?');
-            // server.requests.length.should.be.equal(1);
+            server.requests[0].method.should.be.equal('POST');
+            server.requests[0].url.should.be.equal('https://fake/dog/9?');
+            server.requests.length.should.be.equal(1);
+
+            // Assert that the entity is no longer present in the array
 
             done();
         });

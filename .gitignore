@@ -1,6 +1,7 @@
 node_modules
 app/dist
 app/doc
+dist
 sample-ui/vendor/scripts/milo.js
 test/npm-debug.log
 website/stylesheets

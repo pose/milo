@@ -5,6 +5,24 @@ describe('Write operations', function () {
         // API
         window.API = Milo.API.create({});
         API.options('baseUrl', 'https://fake');
+        
+        API.Dog = Milo.Model.extend({
+            uriTemplate: '/dog/:id',
+            id: Milo.property('number'),
+            name: Milo.property('string')
+        });
+        
+        API.Author = Milo.Model.extend({
+            id: Milo.property('number'),
+            name: Milo.property('string')
+        });
+
+        API.Book = Milo.Model.extend({
+            uriTemplate: '/book/:id',
+            id: Milo.property('number'),
+            name: Milo.property('string'),
+            authors: Milo.collection('API.Author', {embedded: true})
+        });
 
         // Fake server
         server = sinon.fakeServer.create();
@@ -19,11 +37,6 @@ describe('Write operations', function () {
         var dog, promise;
         
         // Arrange
-        API.Dog = Milo.Model.extend({
-            uriTemplate: '/dog/:id',
-            id: Milo.property('number'),
-            name: Milo.property('string')
-        });
         dog = API.Dog.create({id: 9, name: 'Bobby'});
 
         // Act
@@ -54,15 +67,10 @@ describe('Write operations', function () {
             "{}");
     });
 
-    it.skip('should work with existing basic entities', function (done) {
+    it('should work with existing basic entities', function (done) {
         var dog, promise;
         
         // Arrange
-        API.Dog = Milo.Model.extend({
-            uriTemplate: '/dog/:id',
-            id: Milo.property('number'),
-            name: Milo.property('string')
-        });
         dog = API.Dog.where({id: 9}).findOne();
             
         dog.done(function () {
@@ -102,6 +110,40 @@ describe('Write operations', function () {
     });
 
     it.skip('should work with nested entities', function () {
+        // Arrange
+        var book, author, promise;
+
+        book = API.Book.create({id: 1, name: 'A Clockwork Orange', 
+            authors: [API.Author.create({id: 5, name: 'Anthony Burgess'})]});
+
+        // Act
+        author = book.get('authors')[0];
+        author.set('name', 'Jorge Luis Borges');
+        promise = author.save();
+
+        // Assert
+        promise.should.be.ok;
+        author.should.be.ok;
+        author.should.have.property('isDeleting', true);
+        ['done', 'fail', 'then'].forEach(function (verb) {
+            promise.should.have.property(verb);
+        });
+        
+        // XXX What is data?
+        promise.done(function (data) {
+            data.should.have.property('isDeleting', false);
+            
+            server.requests[0].method.should.be.equal('POST');
+            server.requests[0].url.should.be.equal('https://fake/dog/9?');
+            server.requests.length.should.be.equal(1);
+
+            // Assert that the entity is no longer present in the array
+
+            done();
+        });
+
+        server.requests[0].respond(200, {'Content-Type': 'application/json'}, "{}");
+
     });
 
     it.skip('should work with existing nested entities', function () {

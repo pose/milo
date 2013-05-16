@@ -352,34 +352,40 @@ Milo.DefaultAdapter = Em.Object.extend({
     query: function (modelClass, params, queryable) {
         var api = Milo.Helpers.apiFromModelClass(modelClass),
             uriTemplate = queryable.get('uriTemplate');
-            urlAndQueryParams = this._splitUrlAndDataParams(modelClass, params, uriTemplate),
-            resourceUrl = this._buildResourceUrl(modelClass, urlAndQueryParams.urlParams, uriTemplate),
-            url = api.options('baseUrl') + resourceUrl,
-            queryParams = $.param($.extend({}, urlAndQueryParams.dataParams, api.queryParams())),
-            method = 'GET',
-            deferred = $.Deferred(),
-            meta = { meta: urlAndQueryParams.urlParams },
-            rootElement = queryable.get('rootElement'),
-            that = this;
+        urlAndQueryParams = this._splitUrlAndDataParams(modelClass, params, uriTemplate),
+        resourceUrl = this._buildResourceUrl(modelClass, urlAndQueryParams.urlParams, uriTemplate),
+        url = api.options('baseUrl') + resourceUrl,
+        queryParams = $.param($.extend({}, urlAndQueryParams.dataParams, api.queryParams())),
+        method = 'GET',
+        deferred = $.Deferred(),
+        meta = {
+            meta: urlAndQueryParams.urlParams
+        },
+        rootElement = queryable.get('rootElement'),
+        that = this;
 
         this._ajax(api, method, url + '?' + queryParams)
             .done(function (data) {
-                var root = data[rootElement],
-                    deserialized;
+            var root = data[rootElement],
+                deserialized;
 
-                if (root && Em.isArray(root)) {
-                    deserialized = Em.A(root.map(function (dataRow) {
-                        return that._deserialize(modelClass, $.extend({}, meta, { id: dataRow.id }, dataRow));
-                    }));
-                } else {
-                    deserialized = that._deserialize(modelClass, $.extend({}, meta, { id: data.id }, data));
-                }
+            if (root && Em.isArray(root)) {
+                deserialized = Em.A(root.map(function (dataRow) {
+                    return that._deserialize(modelClass, $.extend({}, meta, {
+                        id: dataRow.id
+                    }, dataRow));
+                }));
+            } else {
+                deserialized = that._deserialize(modelClass, $.extend({}, meta, {
+                    id: data.id
+                }, data));
+            }
 
-                deferred.resolve(deserialized);
-            })
+            deferred.resolve(deserialized);
+        })
             .fail(function () {
-                deferred.reject(arguments);
-            });
+            deferred.reject(arguments);
+        });
 
         return deferred.promise();
     },
@@ -404,16 +410,16 @@ Milo.DefaultAdapter = Em.Object.extend({
 
         this._ajax(api, method, url + '?' + queryParams, serialized)
             .done(function (data) {
-                model.set('isDirty', false);
-                model.set('isNew', false);
-                model.set('isSaving', false);
-                deferred.resolve(model);
-            })
+            model.set('isDirty', false);
+            model.set('isNew', false);
+            model.set('isSaving', false);
+            deferred.resolve(model);
+        })
             .fail(function () {
-                model.set('errors', arguments);
-                model.set('isSaving', false);
-                deferred.reject(arguments);
-            });
+            model.set('errors', arguments);
+            model.set('isSaving', false);
+            deferred.reject(arguments);
+        });
 
         return deferred.promise();
     },
@@ -436,16 +442,16 @@ Milo.DefaultAdapter = Em.Object.extend({
 
         this._ajax(api, method, url + '?' + queryParams)
             .done(function (data) {
-                model.set('isDirty', false);
-                model.set('isDeleted', true);
-                model.set('isDeleting', false);
-                deferred.resolve(model);
-            })
+            model.set('isDirty', false);
+            model.set('isDeleted', true);
+            model.set('isDeleting', false);
+            deferred.resolve(model);
+        })
             .fail(function () {
-                model.set('errors', arguments);
-                model.set('isDeleting', false);
-                deferred.reject(arguments);
-            });
+            model.set('errors', arguments);
+            model.set('isDeleting', false);
+            deferred.reject(arguments);
+        });
 
         return deferred.promise();
     },
@@ -486,7 +492,7 @@ Milo.DefaultAdapter = Em.Object.extend({
         }
 
         var urlTerms = uriTemplate.split('/');
-            resourceUrl = uriTemplate;
+        resourceUrl = uriTemplate;
 
         urlTerms.forEach(function (uriTerm) {
             var fieldName = uriTerm.replace(':', '');
@@ -535,7 +541,10 @@ Milo.DefaultAdapter = Em.Object.extend({
             }
         });
 
-        return { urlParams: urlParams, dataParams: dataParams };
+        return {
+            urlParams: urlParams,
+            dataParams: dataParams
+        };
     },
 
     /**

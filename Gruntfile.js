@@ -18,7 +18,7 @@ module.exports = function (grunt) {
                 'src/core/api.js']
         },
 
-        clean: ['website/stylesheets', 'website/api', 'dist', 'sample-ui/vendor/scripts/<%= pkg.name %>.js'],
+        clean: ['website/stylesheets', 'website/api', 'dist', 'web-ui/vendor/scripts/<%= pkg.name %>.js'],
 
         concat: {
             dist: {
@@ -27,7 +27,7 @@ module.exports = function (grunt) {
             },
             sentToExample: {
                 src: '<%= dirs.src %>',
-                dest: 'samples/sample-ui/vendor/scripts/<%= pkg.name %>.js'
+                dest: 'samples/web-ui/vendor/scripts/<%= pkg.name %>.js'
             }
         },
 

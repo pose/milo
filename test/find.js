@@ -135,7 +135,7 @@ describe('Query operations', function () {
             .done(function (data) {
                 // Assert
                 author.should.be.equal(data);
-                author.should.have.property('isLoaded', true);
+                author.get('isLoaded').should.be.equal(true);
 
                 author.get('id').should.be.equal(23);
                 author.get('name').should.be.equal('Joseph Heller');
@@ -146,7 +146,7 @@ describe('Query operations', function () {
                 done();
             });
         author.should.be.ok;
-        author.should.have.property('isLoaded', false);
+        author.get('isLoaded').should.be.equal(false);
         author.should.have.property('done');
         author.should.have.property('fail');
         author.should.have.property('then');

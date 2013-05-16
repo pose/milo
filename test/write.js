@@ -44,14 +44,14 @@ describe('Write operations', function () {
 
         // Assert
         dog.should.be.ok;
-        dog.should.have.property('isSaving', true);
+        dog.get('isSaving').should.be.equal(true);
         ['done', 'fail', 'then'].forEach(function (verb) {
             promise.should.have.property(verb);
         });
 
         promise.done(function (data) {
             data.should.be.equal(dog);
-            data.should.have.property('isSaving', false);
+            data.get('isSaving').should.be.equal(false);
 
             data.get('id').should.be.equal(9);
             data.get('name').should.be.equal('Bobby');
@@ -81,14 +81,14 @@ describe('Write operations', function () {
 
             // Assert
             dog.should.be.ok;
-            dog.should.have.property('isSaving', true);
+            dog.get('isSaving').should.be.equal(true);
             ['done', 'fail', 'then'].forEach(function (verb) {
                 promise.should.have.property(verb);
             });
 
             promise.done(function (data) {
                 data.should.be.equal(dog);
-                data.should.have.property('isSaving', false);
+                data.get('isSaving').should.be.equal(false);
 
                 data.get('id').should.be.equal(9);
                 data.get('name').should.be.equal('Pompi');

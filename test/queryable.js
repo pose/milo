@@ -22,7 +22,7 @@ describe('Support in queries of', function () {
             (function() {
                 queryable.orderBy(1);
             }).should.Throw(/Ordering field must be a valid string/i);
-            
+
             (function() {
                 queryable.orderByDescending('');
             }).should.Throw(/Ordering field must be a valid string/i);
@@ -36,7 +36,7 @@ describe('Support in queries of', function () {
             (function() {
                 queryable.orderBy(undefined);
             }).should.Throw(/Ordering field must be a valid string/i);
-            
+
         });
 
     });

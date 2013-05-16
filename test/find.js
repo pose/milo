@@ -13,7 +13,7 @@ describe('Query operations', function () {
         // API
         window.API = Milo.API.create({});
         API.options('baseUrl', 'https://myapi.com/api');
-        
+
         // Fake Server
         server = sinon.fakeServer.create();
     });
@@ -54,9 +54,9 @@ describe('Query operations', function () {
 
             done();
         });
-        
+
         server.requests[0].url.should.be.equal('https://myapi.com/api/dog/1?');
-        server.requests[0].respond(200, { "Content-Type": "application/json" }, 
+        server.requests[0].respond(200, { "Content-Type": "application/json" },
                 JSON.stringify({id: 1, name: 'bobby', age: 3}));
     });
 
@@ -77,8 +77,8 @@ describe('Query operations', function () {
             id: Milo.property('number'),
             name: Milo.property('string')
         });
-        
-        // Act 
+
+        // Act
         var foo = API.Foo.where({id: 42}).findOne();
 
         // Assert
@@ -93,17 +93,17 @@ describe('Query operations', function () {
             // XXX Can't have a property named content, throw exception if found
             foo.get('id').should.be.equal(42);
             foo.get('name').should.be.equal('Catch 22');
-            
+
             server.requests.length.should.be.equal(1);
             server.requests[0].url.should.be.equal("https://myapi.com/api/foo/42?");
 
-            
+
             done();
         });
-        
-        server.requests[0].respond(200, { "Content-Type": "application/json" }, 
+
+        server.requests[0].respond(200, { "Content-Type": "application/json" },
                 JSON.stringify({id: 42, name: 'Catch 22'}));
-        
+
     });
 
     it('should handle nested entities', function (done) {
@@ -151,7 +151,7 @@ describe('Query operations', function () {
         author.should.have.property('fail');
         author.should.have.property('then');
 
-        server.requests[0].respond(200, { "Content-Type": "application/json" }, 
+        server.requests[0].respond(200, { "Content-Type": "application/json" },
                 JSON.stringify({authors: [{id: 23, name: 'Joseph Heller'}]}));
     });
 
@@ -201,7 +201,7 @@ describe('Query operations', function () {
         author.should.have.property('fail');
         author.should.have.property('then');
 
-        server.requests[0].respond(200, { "Content-Type": "application/json" }, 
+        server.requests[0].respond(200, { "Content-Type": "application/json" },
                 JSON.stringify({authors: [{id: 23, name: 'Joseph Heller'}, {id: 24, name: 'Julio Cortázar'}]}));
     });
 
@@ -247,7 +247,7 @@ describe('Query operations', function () {
         author.should.have.property('fail');
         author.should.have.property('then');
 
-        server.requests[0].respond(200, { "Content-Type": "application/json" }, 
+        server.requests[0].respond(200, { "Content-Type": "application/json" },
                 JSON.stringify({authors: [{id: 23, name: 'Joseph Heller'}, {id: 24, name: 'Julio Cortázar'}]}));
     });
 
@@ -265,8 +265,8 @@ describe('Query operations', function () {
             })
         });
         API.options('auth', { api_key: 'XXX' });
-        
-        // Act 
+
+        // Act
         var foo = API.Foo.where({'id':42}).findOne();
 
         // Assert
@@ -280,10 +280,10 @@ describe('Query operations', function () {
 
             done();
         });
-        
-        server.requests[0].respond(200, { "Content-Type": "application/json" }, 
+
+        server.requests[0].respond(200, { "Content-Type": "application/json" },
                 JSON.stringify({id: 42, name: 'Catch 22'}));
-        
+
     });
 
     it('should add content type (when set) to the requests', function (done) {
@@ -294,8 +294,8 @@ describe('Query operations', function () {
             name: Milo.property('string')
         });
         API.headers('Content-Type', 'application/cool');
-        
-        // Act 
+
+        // Act
         var foo = API.Foo.where({'id':42}).findOne();
 
         // Assert
@@ -311,13 +311,13 @@ describe('Query operations', function () {
 
             done();
         });
-        
-        server.requests[0].respond(200, { "Content-Type": "application/json" }, 
+
+        server.requests[0].respond(200, { "Content-Type": "application/json" },
                 JSON.stringify({id: 42, name: 'Catch 22'}));
-        
+
 
     });
-    
+
     it('.fail() should be executed when the request fail', function (done) {
         // Arrange
         API.Foo = Milo.Model.extend({
@@ -325,8 +325,8 @@ describe('Query operations', function () {
             id: Milo.property('number'),
             name: Milo.property('string')
         });
-        
-        // Act 
+
+        // Act
         var foo = API.Foo.where({id: 42}).findOne();
 
         // Assert
@@ -340,14 +340,14 @@ describe('Query operations', function () {
         foo.fail(function (data) {
             foo.should.have.property('isLoaded', true);
             // XXX Can't have a property named content, throw exception if found
-            
+
             server.requests.length.should.be.equal(1);
             server.requests[0].url.should.be.equal("https://myapi.com/api/foo/42?");
 
-            
+
             done();
         });
-        
+
         server.requests[0].respond(404, { "Content-Type": "application/json" }, JSON.stringify({message: 'Not found'}));
     });
 

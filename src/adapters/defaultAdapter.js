@@ -224,7 +224,8 @@ Milo.DefaultAdapter = Em.Object.extend({
             data: data ? JSON.stringify(data) : '',
             url: url,
             headers: headers,
-            cache: cacheFlag
+            cache: cacheFlag,
+            crossDomain: true
         });
     }
 });

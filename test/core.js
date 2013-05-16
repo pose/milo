@@ -152,13 +152,13 @@ describe('Core', function () {
             API.serializer().should.be.equal(mockSerializer);
         });
     });
-    
+
 
     describe('API.options validation', function () {
         var API, API2;
 
         beforeEach(function () {
-            API = Milo.API.create(); 
+            API = Milo.API.create();
             API2 = Milo.API.create();
         });
 
@@ -169,13 +169,13 @@ describe('Core', function () {
 
         it.skip('should fail if baseUrl is set to undefined', function () {
             // Arrange
-            var setToUndefined = function () { 
+            var setToUndefined = function () {
                 API.options('baseUrl', undefined);
             };
 
-            // Act 
+            // Act
             setToUndefined.
-            
+
             // Assert
             should.Throw(/not supported/i);
         });
@@ -185,23 +185,23 @@ describe('Core', function () {
             var smtp = function () {
                 API.options('baseUrl', 'smtp://hello');
             };
-            
+
             // Act
             smtp.
-            
+
             // Assert
             should.Throw(/smtp.*not supported/i);
         });
-        
+
         it('should fail if protocol set to unknown protocol', function () {
             // Arrange
             var unknown = function () {
                 API.options('baseUrl', 'bye://hello');
             };
-            
+
             // Act
             unknown.
-            
+
             // Assert
             should.Throw(/bye.* not supported/i);
         });
@@ -213,7 +213,7 @@ describe('Core', function () {
             // Act
             API.options('baseUrl', http);
             API2.options('baseUrl', https);
-            
+
             // Assert
 
             // No exception should be thrown :)
@@ -226,9 +226,9 @@ describe('Core', function () {
                 API.options({baseUrl: 'lala://', auth: 'my-token'});
             };
 
-            // Act 
+            // Act
             usingDictionary.
-            
+
             // Assert
             should.Throw(/not supported/i);
         });

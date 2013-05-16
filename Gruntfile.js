@@ -15,7 +15,9 @@ module.exports = function (grunt) {
                 'src/adapters/defaultSerializer.js',
                 'src/core/queryable.js',
                 'src/dsl/model.js',
-                'src/core/api.js']
+                'src/core/api.js',
+                'src/pagination/paginationPlugin.js',
+                'src/pagination/defaultPaginationPlugin.js']
         },
 
         clean: ['website/stylesheets', 'website/api', 'dist', 'web-ui/vendor/scripts/<%= pkg.name %>.js'],

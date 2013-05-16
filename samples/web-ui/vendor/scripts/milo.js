@@ -155,7 +155,7 @@ Milo.property = function (type, options) {
 Milo.collection = function (type, options) {
     options = options || {};
     options.occurrences = "many";
-    options.embedded = options.embedded || false ? true : false;
+    options.embedded = options.embedded ? true : false;
     options.type = type || 'string';
     options.defaultValue = (options.defaultValue === undefined) ? null : options.defaultValue;
     options.operations = (options.operations === undefined) ? ['put', 'post'] : options.operations;

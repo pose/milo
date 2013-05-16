@@ -28,10 +28,39 @@ app.get('/api/movies', function (req, res) {
 
     query.apikey = apikey;
 
-    request.get('http://api.rottentomatoes.com/api/public/v1.0/lists/movies/in_theaters.json')
-        .query(query).end(function (err, result) {
+    if (query.q) {
+        request.get('http://api.rottentomatoes.com/api/public/v1.0/movies.json')
+            .query(query).end(function (err, result) {
             res.send(200, JSON.parse(result.text));
         });
+    } else {
+        request.get('http://api.rottentomatoes.com/api/public/v1.0/lists/movies/in_theaters.json')
+            .query(query).end(function (err, result) {
+            res.send(200, JSON.parse(result.text));
+        });
+    }
+});
+
+app.get('/api/movies/:id', function (req, res) {
+    var query = req.query || {};
+
+    query.apikey = apikey;
+
+    request.get('http://api.rottentomatoes.com/api/public/v1.0/movies/' + req.params.id)
+        .query(query).end(function (err, result) {
+        res.send(200, JSON.parse(result.text));
+    });
+});
+
+app.get('/api/movies/:id/reviews', function (req, res) {
+    var query = req.query || {};
+
+    query.apikey = apikey;
+
+    request.get('http://api.rottentomatoes.com/api/public/v1.0/movies/' + req.params.id + '/reviews.json')
+        .query(query).end(function (err, result) {
+        res.send(200, JSON.parse(result.text));
+    });
 });
 
 app.listen(3000);

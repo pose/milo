@@ -40,7 +40,7 @@ Milo.Queryable = Em.Mixin.create({
     /**
         Adds 'desc' param to the request url
 
-        @method orderByDescending 
+        @method orderByDescending
         @param {String} fieldname
         @chainable
         @return {Milo.Queryable}
@@ -57,7 +57,7 @@ Milo.Queryable = Em.Mixin.create({
         return this;
     },
 
-    /** 
+    /**
         Adds 'limit' param to the request url
 
         @method take
@@ -76,7 +76,7 @@ Milo.Queryable = Em.Mixin.create({
         return this;
     },
 
-    /** 
+    /**
         Adds 'offset' param to the request url
 
         @method skip
@@ -95,10 +95,10 @@ Milo.Queryable = Em.Mixin.create({
         return this;
     },
 
-    /** 
+    /**
         Adds the filter params to the request url
 
-        @method find 
+        @method find
         @param {Object} [clause]
         @chainable
         @return {Milo.Queryable}
@@ -113,7 +113,7 @@ Milo.Queryable = Em.Mixin.create({
         return this;
     },
 
-    /** 
+    /**
         Executes a query expecting to get a single element as a result, if not it will throw an exception
 
         @method single
@@ -127,10 +127,16 @@ Milo.Queryable = Em.Mixin.create({
         });
     },
 
-    /** 
+    paginate: function (params) {
+        var plugin = this._intializePaginationPlugin();
+
+        plugin.paginate(params, this);
+    },
+
+    /**
         Executes a query expecting to get an array of element as a result
 
-        @method toArray 
+        @method toArray
         @return {Milo.Queryable}
         @example
             Hollywood.Actor.find().toArray();
@@ -139,6 +145,31 @@ Milo.Queryable = Em.Mixin.create({
         return this._materialize(Milo.ArrayProxy, function (deserialized) {
             return Em.isArray(deserialized) ? deserialized : Em.A([deserialized]);
         });
+    },
+
+    _intializePaginationPlugin: function() {
+        var options = this._getAPI(this).options('pagination'),
+            plugin;
+
+        if (!options) {
+            throw 'Pagination is not configured';
+        }
+
+        options.plugin = options.plugin || Milo.DefaultPaginationPlugin;
+
+        if ('function' !== typeof options.plugin.create) {
+            throw 'Pagination plugin should be an Ember class';
+        }
+
+        plugin = options.plugin.create({ config: options.config });
+
+        if (!Milo.PaginationPlugin.detectInstance(plugin)) {
+            throw 'Pagination plugin should extend Milo.PaginationPlugin';
+        }
+
+        this.set('paginationPlugin', plugin);
+
+        return plugin;
     },
 
     _getModelClass: function () {
@@ -152,7 +183,7 @@ Milo.Queryable = Em.Mixin.create({
     */
     _extractParameters: function () {
         var params = [];
-        
+
         // TODO Fail earlier if Model Class is invalid
         if (!this._getModelClass() || !this._getModelClass().options) {
             throw 'Entity was created from a Milo.API instance not registered as a global';
@@ -163,7 +194,7 @@ Milo.Queryable = Em.Mixin.create({
         params.push(this.get('takeClause'));
         params.push(this.get('skipClause'));
 
-        
+
         params.push(this._getModelClass().options('auth'));
 
         return $.extend.apply(null, [{}].concat(params));
@@ -180,7 +211,7 @@ Milo.Queryable = Em.Mixin.create({
                 isLoaded: false,
                 errors: null,
                 deferred: $.Deferred()
-            }), 
+            }),
             apiFromModelClass = this._getModelClass();
 
         apiFromModelClass.adapter().query(modelClass, params, this)

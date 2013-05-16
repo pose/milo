@@ -1,11 +1,15 @@
 // ===== Namespace =====
 var App = require('app');
 
+// ===== Milo JS =====
+var Api = Milo.API.create();
+
+Api.options('baseUrl', 'http://localhost:3000/api');
+
+window.Api = Api;
 
 // ===== Router =====
-App.Router.map(function () {
-
-});
+App.Router.map(function () {});
 
 // ===== Routes =====
 require('routes');

@@ -1,0 +1,12 @@
+<h2>Movies</h2>
+<ul>
+	{{#if content.isLoaded}}
+		loading...
+	{{else}}
+	    {{#each item in content}}
+	        <li>
+	        	<p>{{item.title}}</p>
+	        </li>
+	    {{/each}}
+    {{/if}}
+</ul>

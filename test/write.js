@@ -93,7 +93,7 @@ describe('Write operations', function () {
                 data.get('id').should.be.equal(9);
                 data.get('name').should.be.equal('Pompi');
 
-                server.requests[1].method.should.be.equal('POST');
+                server.requests[1].method.should.be.equal('PUT');
                 server.requests[1].url.should.be.equal('https://fake/dog?');
                 server.requests.length.should.be.equal(2);
 
@@ -109,7 +109,7 @@ describe('Write operations', function () {
 
     });
 
-    it.skip('should work with nested entities', function () {
+    it('should work with nested entities', function () {
         // Arrange
         var book, author, promise;
 
@@ -119,19 +119,19 @@ describe('Write operations', function () {
         // Act
         author = book.get('authors')[0];
         author.set('name', 'Jorge Luis Borges');
-        promise = author.save();
+        promise = book.save();
 
         // Assert
         promise.should.be.ok;
         author.should.be.ok;
-        author.should.have.property('isDeleting', true);
+        book.get('isSaving').should.be.equal(true);
         ['done', 'fail', 'then'].forEach(function (verb) {
             promise.should.have.property(verb);
         });
 
         // XXX What is data?
         promise.done(function (data) {
-            data.should.have.property('isDeleting', false);
+            data.get('isSaving').should.be.equal(false);
 
             server.requests[0].method.should.be.equal('POST');
             server.requests[0].url.should.be.equal('https://fake/dog/9?');

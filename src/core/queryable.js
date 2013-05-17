@@ -122,9 +122,7 @@ Milo.Queryable = Em.Mixin.create({
             Hollywood.Actor.findOne();
     */
     findOne: function () {
-        return this._materialize(Milo.Proxy, function (deserialized) {
-            return Em.isArray(deserialized) ? deserialized[0] : deserialized;
-        });
+        return this._materialize(false);
     },
 
     paginate: function (params) {
@@ -142,9 +140,7 @@ Milo.Queryable = Em.Mixin.create({
             Hollywood.Actor.find().toArray();
     */
     findMany: function () {
-        return this._materialize(Milo.ArrayProxy, function (deserialized) {
-            return Em.isArray(deserialized) ? deserialized : Em.A([deserialized]);
-        });
+        return this._materialize(true);
     },
 
     _intializePaginationPlugin: function() {
@@ -204,29 +200,28 @@ Milo.Queryable = Em.Mixin.create({
     @method _materialize
     @private
     */
-    _materialize: function (proxyClass, extractContentFromDeserialized) {
+    _materialize: function (multiple) {
         var modelClass = this.constructor,
             params = this._extractParameters(),
-            proxy = proxyClass.create({
-                isLoaded: false,
-                errors: null,
-                deferred: $.Deferred()
-            }),
-            apiFromModelClass = this._getModelClass();
-
-        apiFromModelClass.adapter().query(modelClass, params, this)
+            apiFromModelClass = this._getModelClass(),
+            model = this,
+            deferred = $.Deferred();
+        apiFromModelClass.adapter().query(modelClass, params, model, multiple)
             .fail(function (errors) {
-                proxy.set('errors', errors);
-                proxy.set('isError', true);
-                proxy.set('isLoaded', true);
-                proxy.get('deferred').reject(errors);
+                model.set('errors', errors);
+                model.set('isError', true);
+                model.set('isLoaded', true);
+                deferred.reject(errors);
             })
             .done(function (deserialized) {
-                proxy.set('content', extractContentFromDeserialized(deserialized));
-                proxy.set('isLoaded', true);
-                proxy.get('deferred').resolve(proxy);
+                model.set('isLoaded', true);
+                deferred.resolve(model);
             });
 
-        return proxy;
+        // XXX What happens after the user has done many queries? Does the reference to the 
+        // deferred ever gets lost?
+        model.set('deferred', deferred.promise());
+
+        return model;
     }
 });

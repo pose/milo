@@ -60,8 +60,47 @@ describe('Remove operations', function () {
         server.requests[0].respond(200, {'Content-Type': 'application/json'}, "{}");
 
     });
+    
+    it('should work with existing basic entities', function (done) {
+        var dog, promise;
 
-    it.skip('should work with nested entities', function (done) {
+        // Arrange
+        dog = API.Dog.where({id: 9}).findOne();
+
+        dog.done(function () {
+            // Act
+            dog.should.have.property('remove');
+            promise = dog.remove();
+
+            // Assert
+            dog.should.be.ok;
+            dog.get('isDeleting').should.be.equal(true);
+            ['done', 'fail', 'then'].forEach(function (verb) {
+                promise.should.have.property(verb);
+            });
+
+            promise.done(function (data) {
+                data.should.be.equal(dog);
+                data.get('isDeleting').should.be.equal(false);
+
+                server.requests[1].method.should.be.equal('DELETE');
+                server.requests[1].url.should.be.equal('https://fake/dog/9?');
+                server.requests.length.should.be.equal(2);
+
+                done();
+            });
+
+            server.requests[1].respond(200, {'Content-Type': 'application/json'},
+                "{}");
+        });
+
+        server.requests[0].respond(200, {'Content-Type': 'application/json'},
+            JSON.stringify({id: 9, name: 'Milu'}));
+
+
+    });
+
+    it('should work with nested entities', function (done) {
         // Arrange
         var book, author, promise;
 
@@ -69,23 +108,23 @@ describe('Remove operations', function () {
             authors: [API.Author.create({id: 5, name: 'Anthony Burgess'})]});
 
         // Act
-        author = book.get('authors')[0];
-        promise = author.remove();
+        author = book.get('authors').splice(0);
+        promise = book.save();
 
         // Assert
         promise.should.be.ok;
-        author.should.be.ok;
-        author.should.have.property('isDeleting', true);
+        book.should.be.ok;
+        book.get('isSaving').should.be.equal(true);
         ['done', 'fail', 'then'].forEach(function (verb) {
             promise.should.have.property(verb);
         });
         
         // XXX What is data?
         promise.done(function (data) {
-            data.should.have.property('isDeleting', false);
+            data.get('isSaving').should.be.equal(false);
             
-            server.requests[0].method.should.be.equal('POST');
-            server.requests[0].url.should.be.equal('https://fake/dog/9?');
+            server.requests[0].method.should.be.equal('PUT');
+            server.requests[0].url.should.be.equal('https://fake/book/1?');
             server.requests.length.should.be.equal(1);
 
             // Assert that the entity is no longer present in the array
@@ -94,11 +133,9 @@ describe('Remove operations', function () {
         });
 
         server.requests[0].respond(200, {'Content-Type': 'application/json'}, "{}");
-
-
     });
 
-    it.skip('.fail() should be executed when the request fail', function (done) {
+    it('.fail() should be executed when the request fail', function (done) {
         // Arrange
         var dog, promise;
         dog = API.Dog.create({id: 9, name: 'Bobby'});
@@ -115,7 +152,7 @@ describe('Remove operations', function () {
 
         // TODO XXX What is data?
         promise.fail(function (data) {
-            data.should.have.property('isDeleting', false);
+            dog.get('isDeleting').should.be.equal(false);
             
             server.requests[0].method.should.be.equal('DELETE');
             server.requests[0].url.should.be.equal('https://fake/dog/9?');
@@ -125,7 +162,7 @@ describe('Remove operations', function () {
         });
 
         server.requests[0].respond(404, {'Content-Type': 'application/json'}, 
-                JSON.strinfigy({message: 'Entity not found'}));
+                JSON.stringify({message: 'Entity not found'}));
 
     });
 });

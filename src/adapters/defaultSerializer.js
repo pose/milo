@@ -94,8 +94,8 @@ Milo.DefaultSerializer = Em.Object.extend({
             return serialized;
         };
 
-        serializer.deserialize = modelClass.deserialize || function (json) {
-            var model = modelClass.create();
+        serializer.deserialize = modelClass.deserialize || function (json, model) {
+            model = model || modelClass.create();
 
             properties.forEach(function (property) {
                 if (json[property.name] === undefined) {

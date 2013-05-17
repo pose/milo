@@ -1,8 +1,64 @@
-<h2>In Theaters Movies</h2>
-<ul>
-    {{#each item in content}}
-        <li>
-        	<p>{{item.title}}</p>
-        </li>
-    {{/each}}
-</ul>
+<div class="navbar navbar-inverse navbar-fixed-top">
+  <div class="navbar-inner">
+    <div class="container">
+      <button type="button" class="btn btn-navbar" data-toggle="collapse" data-target=".nav-collapse">
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+      </button>
+      <a class="brand" href="#">Movies Database</a>
+      <div class="nav-collapse collapse">
+        <ul class="nav">
+          <li {{bindAttr class="view.isShowingInTheaters:active"}}><a href="#" {{action showInTheaters href=true target=view}}>In Theaters</a></li>
+          <li {{bindAttr class="view.isShowingUpcoming:active"}}><a href="#" {{action showUpcoming href=true target=view}}>Upcoming</a></li>
+          <li {{bindAttr class="view.isShowingBoxOffice:active"}}><a href="#" {{action showBoxOffice href=true target=view}}>Box Office</a></li>
+        </ul>
+        <div class="navbar-search pull-right">
+          <input type="text" class="search-query" placeholder="Search" {{action target=view on="keyPress"}}>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="container">
+    <table class="table table-striped">
+        <tbody>
+            {{#each item in content}}
+                <tr>
+                    <td style="width: 70px;">
+                        <img style="margin-top: 3px;" {{bindAttr src="item.posters.thumbnail"}}>
+                    </td>
+                    <td>
+                        <div class="row-fluid">
+                            <div style="min-height: 25px;" class="span12">
+                                <a href="#" {{action showDetails item href=true}}>
+                                    <strong>{{item.title}}</strong> ({{item.year}})
+                                </a>
+                            </div>
+                        </div>
+                        <div class="row-fluid">
+                            <div style="min-height: 25px;" class="span12">{{item.mpaa_rating}}</div>
+                        </div>
+                        <div class="row-fluid">
+                            <div style="min-height: 25px;" class="span12">{{item.runtime}} min</div>
+                        </div>
+                        <div class="row-fluid">
+                            <div style="min-height: 25px;" class="span12">
+                                <a {{bindAttr href="item.imdbUrl"}}>IMDb</a>
+                            </div>
+                        </div>
+                    </td>
+                </tr>
+            {{else}}
+              {{#if content.isLoaded}}
+                <tr>
+                  <td>No movies found</td>
+                </tr>
+              {{/if}}
+            {{/each}}
+        </tbody>
+    </table>
+</div>
+
+{{outlet popup}}

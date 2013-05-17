@@ -20,7 +20,17 @@ Api.Movie = Milo.Model.extend({
 
 	posters: Milo.property('Api.Poster'),
 
-	reviews: Milo.collection('Api.Review')
+	alternate_ids: Milo.property('Api.Alternate'),
+
+	reviewCollection: Milo.collection('Api.Review'),
+
+	imdbUrl: function () {
+		return "http://www.imdb.com/title/tt" + this.get('alternate_ids.imdb');
+	}.property(),
+
+	reviews: function () {
+		return this.get('reviewCollection').findMany();
+	}.property(),
 });
 
 module.exports = Api.Movie;

@@ -1,0 +1,46 @@
+<div class="modal fade">
+  <div class="modal-header">
+    <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+    <h3>{{title}} ({{year}})</h3>
+  </div>
+  <div class="modal-body">
+
+    <div class="tabbable tabs-below">
+      <div class="tab-content">
+        <div class="tab-pane active" id="synopsis" style="max-height: 275px;">
+            <div class="well">
+                {{synopsis}}
+            </div>
+        </div>
+        <div class="tab-pane" id="critics" style="max-height: 275px;">
+            <div class="well">
+                {{critics_consensus}}
+            </div>
+        </div>
+        <div class="tab-pane" id="reviews" style="max-height: 275px;">
+            {{#each review in reviews}}
+                <div class="well">
+                    <div class="row-fluid">
+                        <div class="span12"><strong>{{review.critic}}</strong> ({{review.publication}}) - {{review.date}}</div>
+                    </div>
+                    <div class="row-fluid">
+                        <div class="span12">{{review.quote}}</div>
+                    </div>
+                </div>
+            {{else}}
+              No reviews found
+            {{/each}}
+        </div>
+      </div>
+      <ul class="nav nav-tabs">
+        <li class="active"><a href="#synopsis" data-toggle="tab">Synopsis</a></li>
+        <li><a href="#critics" data-toggle="tab">Critics</a></li>
+        <li><a href="#reviews" data-toggle="tab">Reviews</a></li>
+      </ul>
+    </div>
+
+  </div>
+  <div class="modal-footer">
+    <button class="btn" data-dismiss="modal" aria-hidden="true">Close</button>
+  </div>
+</div>

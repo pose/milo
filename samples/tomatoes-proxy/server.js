@@ -33,6 +33,16 @@ app.get('/api/movies', function (req, res) {
             .query(query).end(function (err, result) {
             res.send(200, JSON.parse(result.text));
         });
+    } else if (query.type === 'upcoming') {
+        request.get('http://api.rottentomatoes.com/api/public/v1.0/lists/movies/upcoming.json')
+            .query(query).end(function (err, result) {
+            res.send(200, JSON.parse(result.text));
+        });
+    } else if (query.type === 'box') {
+        request.get('http://api.rottentomatoes.com/api/public/v1.0/lists/movies/box_office.json')
+            .query(query).end(function (err, result) {
+            res.send(200, JSON.parse(result.text));
+        });
     } else {
         request.get('http://api.rottentomatoes.com/api/public/v1.0/lists/movies/in_theaters.json')
             .query(query).end(function (err, result) {
@@ -58,6 +68,17 @@ app.get('/api/movies/:id/reviews', function (req, res) {
     query.apikey = apikey;
 
     request.get('http://api.rottentomatoes.com/api/public/v1.0/movies/' + req.params.id + '/reviews.json')
+        .query(query).end(function (err, result) {
+        res.send(200, JSON.parse(result.text));
+    });
+});
+
+app.get('/api/movies/:id/clips', function (req, res) {
+    var query = req.query || {};
+
+    query.apikey = apikey;
+
+    request.get('http://api.rottentomatoes.com/api/public/v1.0/movies/' + req.params.id + '/clips.json')
         .query(query).end(function (err, result) {
         res.send(200, JSON.parse(result.text));
     });

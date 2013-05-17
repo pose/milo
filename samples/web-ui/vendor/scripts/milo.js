@@ -155,7 +155,7 @@ Milo.property = function (type, options) {
 Milo.collection = function (type, options) {
     options = options || {};
     options.occurrences = "many";
-    options.embedded = options.embedded ? true : false;
+    options.embedded = options.embedded || false ? true : false;
     options.type = type || 'string';
     options.defaultValue = (options.defaultValue === undefined) ? null : options.defaultValue;
     options.operations = (options.operations === undefined) ? ['put', 'post'] : options.operations;
@@ -348,10 +348,11 @@ Milo.DefaultAdapter = Em.Object.extend({
         @method query
         @param {String} modelClass
         @param {Array} params
+        @param {boolean} multiple whether it should return many results or one
     */
-    query: function (modelClass, params, queryable) {
+    query: function (modelClass, params, model,  multiple) {
         var api = Milo.Helpers.apiFromModelClass(modelClass),
-            uriTemplate = queryable.get('uriTemplate');
+            uriTemplate = model.get('uriTemplate');
         urlAndQueryParams = this._splitUrlAndDataParams(modelClass, params, uriTemplate),
         resourceUrl = this._buildResourceUrl(modelClass, urlAndQueryParams.urlParams, uriTemplate),
         url = api.options('baseUrl') + resourceUrl,
@@ -361,29 +362,29 @@ Milo.DefaultAdapter = Em.Object.extend({
         meta = {
             meta: urlAndQueryParams.urlParams
         },
-        rootElement = queryable.get('rootElement'),
+        rootElement = model.get('rootElement'),
         that = this;
 
         this._ajax(api, method, url + '?' + queryParams)
             .done(function (data) {
-            var root = data[rootElement],
-                deserialized;
+                var root = data[rootElement],
+                    deserialized;
 
-            if (root && Em.isArray(root)) {
-                deserialized = Em.A(root.map(function (dataRow) {
-                    return that._deserialize(modelClass, $.extend({}, meta, {
-                        id: dataRow.id
-                    }, dataRow));
-                }));
-            } else {
-                deserialized = that._deserialize(modelClass, $.extend({}, meta, {
-                    id: data.id
-                }, data));
-            }
+                if (root && Em.isArray(root)) {
+                    if (!multiple) {
+                        deserialized = that._deserialize(modelClass, $.extend({}, meta, { id: root[0].id }, root[0]), model);
+                    } else {
+                        root.forEach(function (dataRow) {
+                            model.pushObject(that._deserialize(modelClass, $.extend({}, meta, { id: dataRow.id }, dataRow)));
+                        });
+                    }
+                } else {
+                    deserialized = that._deserialize(modelClass, $.extend({}, meta, { id: data.id }, data), model);
+                }
 
             deferred.resolve(deserialized);
         })
-            .fail(function () {
+        .fail(function () {
             deferred.reject(arguments);
         });
 
@@ -471,11 +472,11 @@ Milo.DefaultAdapter = Em.Object.extend({
         @method _deserialize
         @private
     */
-    _deserialize: function (modelClass, json) {
+    _deserialize: function (modelClass, json, model) {
         var api = Milo.Helpers.apiFromModelClass(modelClass),
             serializer = api.serializer().serializerFor(modelClass);
 
-        return serializer.deserialize(json);
+        return serializer.deserialize(json, model);
     },
 
     /**
@@ -528,6 +529,7 @@ Milo.DefaultAdapter = Em.Object.extend({
             var fieldName = uriTerm.replace(':', '');
 
             if (uriTerm.indexOf(':') === 0) {
+                console.log('delete', uriTerm, fieldName, dataParams[fieldName], data);
 
                 if (dataParams[fieldName] !== undefined) {
                     urlParams[fieldName] = dataParams[fieldName];
@@ -563,7 +565,8 @@ Milo.DefaultAdapter = Em.Object.extend({
             data: data ? JSON.stringify(data) : '',
             url: url,
             headers: headers,
-            cache: cacheFlag
+            cache: cacheFlag,
+            crossDomain: true
         });
     }
 });
@@ -664,8 +667,8 @@ Milo.DefaultSerializer = Em.Object.extend({
             return serialized;
         };
 
-        serializer.deserialize = modelClass.deserialize || function (json) {
-            var model = modelClass.create();
+        serializer.deserialize = modelClass.deserialize || function (json, model) {
+            model = model || modelClass.create();
 
             properties.forEach(function (property) {
                 if (json[property.name] === undefined) {
@@ -731,7 +734,7 @@ Milo.Queryable = Em.Mixin.create({
     /**
         Adds 'desc' param to the request url
 
-        @method orderByDescending 
+        @method orderByDescending
         @param {String} fieldname
         @chainable
         @return {Milo.Queryable}
@@ -748,7 +751,7 @@ Milo.Queryable = Em.Mixin.create({
         return this;
     },
 
-    /** 
+    /**
         Adds 'limit' param to the request url
 
         @method take
@@ -767,7 +770,7 @@ Milo.Queryable = Em.Mixin.create({
         return this;
     },
 
-    /** 
+    /**
         Adds 'offset' param to the request url
 
         @method skip
@@ -786,10 +789,10 @@ Milo.Queryable = Em.Mixin.create({
         return this;
     },
 
-    /** 
+    /**
         Adds the filter params to the request url
 
-        @method find 
+        @method find
         @param {Object} [clause]
         @chainable
         @return {Milo.Queryable}
@@ -804,7 +807,7 @@ Milo.Queryable = Em.Mixin.create({
         return this;
     },
 
-    /** 
+    /**
         Executes a query expecting to get a single element as a result, if not it will throw an exception
 
         @method single
@@ -813,23 +816,50 @@ Milo.Queryable = Em.Mixin.create({
             Hollywood.Actor.findOne();
     */
     findOne: function () {
-        return this._materialize(Milo.Proxy, function (deserialized) {
-            return Em.isArray(deserialized) ? deserialized[0] : deserialized;
-        });
+        return this._materialize(false);
     },
 
-    /** 
+    paginate: function (params) {
+        var plugin = this._intializePaginationPlugin();
+
+        plugin.paginate(params, this);
+    },
+
+    /**
         Executes a query expecting to get an array of element as a result
 
-        @method toArray 
+        @method toArray
         @return {Milo.Queryable}
         @example
             Hollywood.Actor.find().toArray();
     */
     findMany: function () {
-        return this._materialize(Milo.ArrayProxy, function (deserialized) {
-            return Em.isArray(deserialized) ? deserialized : Em.A([deserialized]);
-        });
+        return this._materialize(true);
+    },
+
+    _intializePaginationPlugin: function() {
+        var options = this._getAPI(this).options('pagination'),
+            plugin;
+
+        if (!options) {
+            throw 'Pagination is not configured';
+        }
+
+        options.plugin = options.plugin || Milo.DefaultPaginationPlugin;
+
+        if ('function' !== typeof options.plugin.create) {
+            throw 'Pagination plugin should be an Ember class';
+        }
+
+        plugin = options.plugin.create({ config: options.config });
+
+        if (!Milo.PaginationPlugin.detectInstance(plugin)) {
+            throw 'Pagination plugin should extend Milo.PaginationPlugin';
+        }
+
+        this.set('paginationPlugin', plugin);
+
+        return plugin;
     },
 
     _getModelClass: function () {
@@ -843,7 +873,7 @@ Milo.Queryable = Em.Mixin.create({
     */
     _extractParameters: function () {
         var params = [];
-        
+
         // TODO Fail earlier if Model Class is invalid
         if (!this._getModelClass() || !this._getModelClass().options) {
             throw 'Entity was created from a Milo.API instance not registered as a global';
@@ -854,7 +884,7 @@ Milo.Queryable = Em.Mixin.create({
         params.push(this.get('takeClause'));
         params.push(this.get('skipClause'));
 
-        
+
         params.push(this._getModelClass().options('auth'));
 
         return $.extend.apply(null, [{}].concat(params));
@@ -864,30 +894,29 @@ Milo.Queryable = Em.Mixin.create({
     @method _materialize
     @private
     */
-    _materialize: function (proxyClass, extractContentFromDeserialized) {
+    _materialize: function (multiple) {
         var modelClass = this.constructor,
             params = this._extractParameters(),
-            proxy = proxyClass.create({
-                isLoaded: false,
-                errors: null,
-                deferred: $.Deferred()
-            }), 
-            apiFromModelClass = this._getModelClass();
-
-        apiFromModelClass.adapter().query(modelClass, params, this)
+            apiFromModelClass = this._getModelClass(),
+            model = this,
+            deferred = $.Deferred();
+        apiFromModelClass.adapter().query(modelClass, params, model, multiple)
             .fail(function (errors) {
-                proxy.set('errors', errors);
-                proxy.set('isError', true);
-                proxy.set('isLoaded', true);
-                proxy.get('deferred').reject(errors);
+                model.set('errors', errors);
+                model.set('isError', true);
+                model.set('isLoaded', true);
+                deferred.reject(errors);
             })
             .done(function (deserialized) {
-                proxy.set('content', extractContentFromDeserialized(deserialized));
-                proxy.set('isLoaded', true);
-                proxy.get('deferred').resolve(proxy);
+                model.set('isLoaded', true);
+                deferred.resolve(model);
             });
 
-        return proxy;
+        // XXX What happens after the user has done many queries? Does the reference to the 
+        // deferred ever gets lost?
+        model.set('deferred', deferred.promise());
+
+        return model;
     }
 });
 
@@ -899,7 +928,72 @@ Milo.Queryable = Em.Mixin.create({
     @uses {Milo.Queryable}
 */
 Milo.Model = Em.Object.extend(Milo.Queryable, {
+    //_array: Em.A(),
+    content: Em.A(),
     meta: Milo.property('object'),
+    /**
+        Indicates if the entity is in the 'loading' state
+        
+        @attribute isLoaded
+        @default false
+        @type boolean
+    */
+    isLoaded: false,
+
+    /**
+        Indicates if the entity is in the 'saving' state
+        
+        @attribute isSaving
+        @default false
+        @type boolean
+    */
+    isSaving: false,
+
+    /**
+        Indicates if the entity is in the 'deleting' state
+        
+        @attribute isDeleting
+        @default false
+        @type boolean
+    */
+    isDeleting: false,
+
+    /**
+        Indicates if the entity is new
+        
+        @attribute isNew
+        @default false
+        @type boolean
+    */
+    isNew: false,
+
+    /**
+        Indicates if the entity is in the 'dirty' state
+        
+        @attribute isDirty
+        @default false
+        @type boolean
+    */
+    isDirty: false,
+
+    /**
+        Indicates if the entity has errors
+        
+        @attribute isError
+        @default false
+        @type boolean
+    */
+    isError: false,
+
+    /**
+        @private
+        @attribute errors
+        @default null
+        @type Array
+    */
+    errors: null,
+
+    deferred: $.Deferred(),
 
     /**
         @method data
@@ -941,7 +1035,45 @@ Milo.Model = Em.Object.extend(Milo.Queryable, {
 
     _getAPI: function () {
         return Milo.Helpers.apiFromModelClass(this.constructor);
+    },
+
+    done: function (f) {
+        if (this.get('deferred')) {
+            this.get('deferred').promise().done(f);
+            return this;
+        }
+    },
+
+    fail: function (f) {
+        if (this.get('deferred')) {
+            this.get('deferred').promise().fail(f);
+            return this;
+        }
+    },
+
+    always: function (f) {
+        if (this.get('deferred')) {
+            this.get('deferred').promise().always(f);
+            return this;
+        }
+    },
+
+    then: function (f) {
+        if (this.get('deferred')) {
+            this.get('deferred').promise().then(f);
+            return this;
+        }
+    },
+
+    pushObject: function(o) {
+        this.get('content').pushObject(o);
+    },
+
+
+    objectAt: function(o) {
+        return this.get('content').objectAt(o);
     }
+
 });
 
 Milo.Model.reopenClass({
@@ -1026,4 +1158,18 @@ Milo.API = Em.Namespace.extend({
     serializer: function (value) {
         return Milo.Helpers.propertyWrapper.bind(this)('_serializer', value);
     }
+});
+
+Milo.PaginationPlugin = Em.Object.extend({
+    config: null,
+
+    includePaginationParams: function (params, queryable) {
+
+    },
+    parseTotalRecordCount: function (response) {
+
+    }
+});
+Milo.DefaultPaginationPlugin = Milo.PaginationPlugin.extend({
+
 });

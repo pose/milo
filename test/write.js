@@ -93,7 +93,7 @@ describe('Write operations', function () {
                 data.get('id').should.be.equal(9);
                 data.get('name').should.be.equal('Pompi');
 
-                server.requests[1].method.should.be.equal('POST');
+                server.requests[1].method.should.be.equal('PUT');
                 server.requests[1].url.should.be.equal('https://fake/dog?');
                 server.requests.length.should.be.equal(2);
 
@@ -109,7 +109,7 @@ describe('Write operations', function () {
 
     });
 
-    it.skip('should work with nested entities', function () {
+    it('should work with nested entities', function () {
         // Arrange
         var book, author, promise;
 

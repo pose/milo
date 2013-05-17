@@ -9,10 +9,11 @@ Milo.DefaultAdapter = Em.Object.extend({
         @method query
         @param {String} modelClass
         @param {Array} params
+        @param {boolean} multiple whether it should return many results or one
     */
-    query: function (modelClass, params, queryable) {
+    query: function (modelClass, params, model,  multiple) {
         var api = Milo.Helpers.apiFromModelClass(modelClass),
-            uriTemplate = queryable.get('uriTemplate');
+            uriTemplate = model.get('uriTemplate');
         urlAndQueryParams = this._splitUrlAndDataParams(modelClass, params, uriTemplate),
         resourceUrl = this._buildResourceUrl(modelClass, urlAndQueryParams.urlParams, uriTemplate),
         url = api.options('baseUrl') + resourceUrl,
@@ -22,29 +23,29 @@ Milo.DefaultAdapter = Em.Object.extend({
         meta = {
             meta: urlAndQueryParams.urlParams
         },
-        rootElement = queryable.get('rootElement'),
+        rootElement = model.get('rootElement'),
         that = this;
 
         this._ajax(api, method, url + '?' + queryParams)
             .done(function (data) {
-            var root = data[rootElement],
-                deserialized;
+                var root = data[rootElement],
+                    deserialized;
 
-            if (root && Em.isArray(root)) {
-                deserialized = Em.A(root.map(function (dataRow) {
-                    return that._deserialize(modelClass, $.extend({}, meta, {
-                        id: dataRow.id
-                    }, dataRow));
-                }));
-            } else {
-                deserialized = that._deserialize(modelClass, $.extend({}, meta, {
-                    id: data.id
-                }, data));
-            }
+                if (root && Em.isArray(root)) {
+                    if (!multiple) {
+                        deserialized = that._deserialize(modelClass, $.extend({}, meta, { id: root[0].id }, root[0]), model);
+                    } else {
+                        root.forEach(function (dataRow) {
+                            model.pushObject(that._deserialize(modelClass, $.extend({}, meta, { id: dataRow.id }, dataRow)));
+                        });
+                    }
+                } else {
+                    deserialized = that._deserialize(modelClass, $.extend({}, meta, { id: data.id }, data), model);
+                }
 
             deferred.resolve(deserialized);
         })
-            .fail(function () {
+        .fail(function () {
             deferred.reject(arguments);
         });
 
@@ -132,11 +133,11 @@ Milo.DefaultAdapter = Em.Object.extend({
         @method _deserialize
         @private
     */
-    _deserialize: function (modelClass, json) {
+    _deserialize: function (modelClass, json, model) {
         var api = Milo.Helpers.apiFromModelClass(modelClass),
             serializer = api.serializer().serializerFor(modelClass);
 
-        return serializer.deserialize(json);
+        return serializer.deserialize(json, model);
     },
 
     /**
@@ -189,6 +190,7 @@ Milo.DefaultAdapter = Em.Object.extend({
             var fieldName = uriTerm.replace(':', '');
 
             if (uriTerm.indexOf(':') === 0) {
+                console.log('delete', uriTerm, fieldName, dataParams[fieldName], data);
 
                 if (dataParams[fieldName] !== undefined) {
                     urlParams[fieldName] = dataParams[fieldName];
